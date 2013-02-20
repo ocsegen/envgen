@@ -1,0 +1,210 @@
+
+<!--
+   observer.xml
+   This file provides building targets for the observer example.
+   -->
+<project name="envgen builders for observer">
+
+	<property name="observer.dir" value="${examples.dir}/observer" />
+	<property name="observer.orig" value="${examples.dir}/observer/orig" />
+	<property name="observer.gen" value="${examples.dir}/observer/env" />
+	<property name="observer.configs" value="${observer.dir}/configs" />	
+
+
+	<target name="compile-observer" depends="" description="compile observer example">
+		<antcall target="compile-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.orig}" />
+		</antcall>
+	</target>
+
+
+	<target name="gen-observer" depends="" description="">
+		<antcall target="gen-observer-re" />
+		<antcall target="gen-observer-se-stubs" />
+	</target>
+
+
+	<target name="gen-observer-re" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-driver-re.properties" />
+
+		</antcall>
+	</target>
+	
+	<target name="gen-observer-ltl" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-driver-ltl.properties" />
+
+		</antcall>
+	</target>
+
+	<target name="gen-observer-univ" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-driver-univ.properties" />
+		</antcall>
+	</target>
+
+	<target name="gen-observer-empty-stubs" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-stubs-empty.properties" />
+		</antcall>
+	</target>
+
+	<target name="gen-observer-se-stubs" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-stubs-se.properties" />
+		</antcall>
+	</target>
+	
+	<target name="gen-observer-containment-stubs" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-stubs-containment.properties" />
+		</antcall>
+	</target>
+	
+	
+		<target name="gen-observer-spec-stubs" depends="" description="">
+			<antcall target="gen-example">
+				<param name="target.srcdir" value="${observer.orig}" />
+				<param name="target.destdir" value="${observer.gen}" />
+				<param name="target.config" value="${observer.configs}/gen-observer-stubs-spec.properties" />
+			</antcall>
+		</target>
+	
+
+	<target name="compile-observer-gen" depends="" description="compile generated observer example">
+		<antcall target="compile-gen-example">
+			<param name="target.srcdir" value="${observer.gen}" />
+		</antcall>
+	</target>
+
+
+	<!--*********************************************************************
+	      * slice-observer: Slicing (not currently used)
+	      *-->
+
+	<target name="slice-observer" depends="" description="">
+		<antcall target="slice-observer-man" /> 
+		<antcall target="slice-observer-gen" />
+	</target>
+
+
+	<target name="slice-observer-man" depends="" description="">
+		<mkdir dir="${observer.orig}/sliced" />
+		<ant antfile="indus.xml" dir="${indus.home}" target="slice" inheritAll="false">
+			<property name="target.classpath" value="${observer.orig}" />
+			<property name="target.output" value="${observer.orig}/sliced" />
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+	
+	<target name="slice-observer-man-scope" depends="" description="">
+		<mkdir dir="${observer.orig}/sliced-scope" />
+		<ant antfile="indus.xml" dir="${indus.home}" target="slice.scope" inheritAll="false">
+			<property name="target.scope" value="${indus.home}/scope-no-libs.xml" />
+			<property name="target.classpath" value="${observer.orig}" />
+			<property name="target.output" value="${observer.orig}/sliced-scope" />
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+
+	<target name="slice-observer-gen" depends="" description="">
+		<mkdir dir="${observer.gen}/sliced" />
+		<ant antfile="indus.xml" dir="${indus.home}" target="slice" inheritAll="false">
+			<property name="target.classpath" value="${observer.gen}:${stubs.home}" />
+			<property name="target.output" value="${observer.gen}/sliced" />
+			<property name="target.class" value="EnvDriver" />
+			<!--	<property name="target1.class" value="Register" />
+			<property name="target2.class" value="Change" /> -->
+		</ant>
+	</target>
+
+	<target name="slice-observer-gen-scope" depends="" description="">
+		<mkdir dir="${observer.gen}/sliced-scope" />
+		<ant antfile="indus.xml" dir="${indus.home}" target="slice.scope" inheritAll="false">
+			<property name="target.scope" value="${indus.home}/scope-no-libs.xml" />
+			<property name="target.classpath" value="${observer.gen}:${stubs.home}" />
+			<property name="target.output" value="${observer.gen}/sliced-scope" />
+			<property name="target.class" value="EnvDriver" />
+		</ant>
+	</target>
+
+	<target name="rw-observer-man" depends="" description="">
+		<mkdir dir="${observer.orig}/rw" />
+		<ant antfile="indus.xml" dir="${indus.home}" target="runRWAnalysis" inheritAll="false">
+			<property name="target.classpath" value="${observer.orig}" />
+			<property name="target.output" value="${observer.orig}/rw" />
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+	<!--*********************************************************************
+	      * mc-observer: [optional] Model Checking (not currently used)
+	      *-->
+
+	<target name="mc-observer" depends="" description="">
+		<antcall target="mc-observer-man" />
+		<antcall target="mc-observer-gen" />
+	</target>
+
+	<target name="mc-observer-man" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.orig}" />
+			<!-- <reference torefid="target.classpath" refid="${examples.build.nongui.dir}/observer"/> -->
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+
+	<target name="mc-observer-man-sliced" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.orig}/sliced" />
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+	<target name="mc-observer-man-sliced-scope" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.orig}/sliced-scope" />
+			<property name="target.class" value="ObserverDriver" />
+		</ant>
+	</target>
+
+	<target name="mc-observer-gen" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.gen}:${stubs.home}" />
+			<property name="target.class" value="EnvDriver" />
+		</ant>
+	</target>
+
+	<target name="mc-observer-gen-sliced" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.gen}/sliced" />
+			<property name="target.class" value="EnvDriver" />
+		</ant>
+	</target>
+
+	<target name="mc-observer-gen-sliced-scope" depends="" description="">
+		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
+			<property name="target.classpath" value="${observer.gen}/sliced-scope" />
+			<property name="target.class" value="EnvDriver" />
+		</ant>
+	</target>
+
+
+</project>

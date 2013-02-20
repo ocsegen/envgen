@@ -1,0 +1,2230 @@
+/* OCSEGen: Open Components and Systems Environment Generator
+ * Copyright (c) <2002-2008> Oksana Tkachuk, Kansas State University.
+ * 
+ * All rights reserved.  This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 which accompanies 
+ * the distribution containing this program, and is available at 
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * For questions about the license, copyright, and software, contact 
+ * Oksana Tkachuk at oksana.tkachuk@gmail.com
+ */  
+PARSER_BEGIN(EnvGenParser)
+
+package edu.ksu.cis.envgen.spec.parser;
+
+import java.util.*;
+import java.util.logging.*;
+
+import soot.*;
+import soot.util.*;
+
+import edu.ksu.cis.envgen.codegen.*;
+import edu.ksu.cis.envgen.spec.*;
+import edu.ksu.cis.envgen.codegen.ast.*;
+import edu.ksu.cis.envgen.codegen.ast.stmt.*;
+import edu.ksu.cis.envgen.codegen.ast.expr.*;
+import edu.ksu.cis.envgen.util.*;
+
+public class EnvGenParser{
+  private static UserSpec userSpec = new UserSpec();
+  //private static SEManager sem = new SEManager();
+  
+  private static Logger logger =  Logger.getLogger("envgen.spec.parser");
+
+  public static UserSpec getUserSpec(){
+    return userSpec;
+  }
+
+  //public static SEManager getSEManager(){
+  //  return sem;
+  //}
+
+  public static void main(String args[]) throws ParseException{
+    EnvGenParser parser;
+    if (args.length == 0) {
+      System.out.println("EnvGenParser:  Reading from standard input . . .");
+      parser = new EnvGenParser(System.in);
+    } else if (args.length == 1) {
+      System.out.println("EnvGenParser:  Reading from file " + args[0] + " . . .");
+      try {
+        parser = new EnvGenParser(new java.io.FileInputStream(args[0]));
+      } catch (java.io.FileNotFoundException e) {
+        System.out.println("EnvGenParser:  File " + args[0] + " not found.");
+        return;
+      }
+    } else {
+      System.out.println("EnvGenParser:  Usage is one of:");
+      System.out.println("         java EnvGenParser < inputfile");
+      System.out.println("OR");
+      System.out.println("         java EnvGenParser inputfile");
+      return;
+    }
+    try {
+      parser.CompilationUnit();
+      System.out.println("EnvGenParser:  Environment assumptions parsed successfully.");
+    } catch (ParseException e) {
+
+      System.out.println("EnvGenParser:  Encountered errors during parse.");
+      System.out.println(e);
+    }
+  }
+
+}
+
+PARSER_END(EnvGenParser)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+/* COMMENTS */
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+|
+  <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+|
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+<IN_FORMAL_COMMENT>
+SPECIAL_TOKEN :
+{
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN :
+{
+  < ENVIRONMENT: "environment">
+| < SETUP: "setup">
+| <CLEANUP: "cleanup">
+| < PROPERTIES: "properties">
+| < REASSUMPTIONS: "re">
+| < LTLASSUMPTIONS: "ltl">
+| < STUBASSUMPTIONS: "stub-assumptions">
+| < DRIVERASSUMPTIONS: "driver-assumptions">
+| < GLOBALLY: "[]">
+| < EVENTUALLY: "<>">
+| < NEXT: "X">
+| < UNTIL: "U">
+| < V: "V">
+| <TRUE: "true">
+| <FALSE: "false">
+
+|  < ABSTRACT: "abstract" >
+| < BOOLEAN: "boolean" >
+| < BREAK: "break" >
+| < BYTE: "byte" >
+| < CASE: "case" >
+| < CATCH: "catch" >
+| < CHAR: "char" >
+| < CLASS: "class" >
+| < CONST: "const" >
+| < CONTINUE: "continue" >
+| < _DEFAULT: "default" >
+| < DO: "do" >
+| < DOUBLE: "double" >
+| < ELSE: "else" >
+| < EXTENDS: "extends" >
+| < FINAL: "final" >
+| <FINALLY: "finally">
+| < FLOAT: "float" >
+| < FOR: "for" >
+| < GOTO: "goto" >
+| < IF: "if" >
+| < IMPLEMENTS: "implements" >
+| < IMPORT: "import" >
+| < INSTANCEOF: "instanceof" >
+| < INT: "int" >
+| < INTERFACE: "interface" >
+| < LONG: "long" >
+| < NATIVE: "native" >
+| < NEW: "new" >
+| < NULL: "null" >
+| < PACKAGE: "package">
+| < PRIVATE: "private" >
+| < PROTECTED: "protected" >
+| < PUBLIC: "public" >
+| < RETURN: "return" >
+| < SHORT: "short" >
+| < STATIC: "static" >
+| < SUPER: "super" >
+| < SWITCH: "switch" >
+| < SYNCHRONIZED: "synchronized" >
+| < THIS: "this" > 
+| < THROW: "throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
+| < TRY: "try" >
+| < VOID: "void" >
+| < VOLATILE: "volatile" >
+| < WHILE: "while" >
+
+| <OR: "OR">
+| <MANY: "MANY">
+| <MANY1: "MANY1">
+| <MANYW: "MANYW">
+| <MAYBE: "MAYBE">
+| <NOT: "NOT">
+| <TIMES: "TIMES">
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|
+  < #LETTER:
+      [
+       "\u0024",
+       "\u0041"-"\u005a",
+       "\u005f",
+       "\u0061"-"\u007a",
+       "\u00c0"-"\u00d6",
+       "\u00d8"-"\u00f6",
+       "\u00f8"-"\u00ff",
+       "\u0100"-"\u1fff",
+       "\u3040"-"\u318f",
+       "\u3300"-"\u337f",
+       "\u3400"-"\u3d2d",
+       "\u4e00"-"\u9fff",
+       "\uf900"-"\ufaff"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "\u0030"-"\u0039",
+       "\u0660"-"\u0669",
+       "\u06f0"-"\u06f9",
+       "\u0966"-"\u096f",
+       "\u09e6"-"\u09ef",
+       "\u0a66"-"\u0a6f",
+       "\u0ae6"-"\u0aef",
+       "\u0b66"-"\u0b6f",
+       "\u0be7"-"\u0bef",
+       "\u0c66"-"\u0c6f",
+       "\u0ce6"-"\u0cef",
+       "\u0d66"-"\u0d6f",
+       "\u0e50"-"\u0e59",
+       "\u0ed0"-"\u0ed9",
+       "\u1040"-"\u1049"
+      ]
+  >
+}
+
+TOKEN : /* SEPARATORS */
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < ASSIGN: "=" >
+| < GT: ">" >
+| < LT: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < INCR: "++" >
+| < DECR: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| <IMPLICATION: "-->">
+| <EQUIVALENCE: "<==>">
+}
+
+
+
+/*****************************************
+ * THE SPECIFICATION LANGUAGE GRAMMAR STARTS HERE 
+ *****************************************/
+
+/*
+ * Program structuring syntax follows.
+ */
+
+void CompilationUnit() :
+{}
+{
+  <ENVIRONMENT> "{"
+  (Setup())? 
+  (Properties())? 
+  Assumptions() 
+  
+  "}"
+  <EOF>
+
+}
+
+void Setup() :
+{String type, varName;
+ JavaExpr expr = null;
+ Proposition prop;
+}
+{
+  <SETUP> "{"
+  (
+
+  expr = Proposition() ";"
+
+  {
+      prop = new Proposition(expr);
+      userSpec.addInitProposition(prop);
+    
+  }
+ 
+  )*    
+  "}"
+}
+
+void Properties() :
+{Token t1, t2; List s = null; SootMethod sm = null; Proposition mc; JavaExpr e;}
+{
+  <PROPERTIES> "{"
+  (t1 = <IDENTIFIER> "=" e = Proposition() ";"
+  {
+
+    mc = new Proposition(e);
+    mc.setLabel(t1.image);
+    
+    userSpec.addDefinition(t1.image, mc);
+    //see if the default methods need to be updated with labels
+    //ast.updateDefaultMethods(mc, t1.image);
+    //ast.getReverseDefinitions().put((t2.image + s), t1.image);
+  }
+  )*
+
+  "}"
+
+
+}
+
+
+void Assumptions() :
+{ RENode regNode; LTLNode ltlNode;  
+  Token threadNameToken = null;
+  Token numToken = null;
+  String threadName = null;
+  int num = 0;
+}
+
+{
+  (<DRIVERASSUMPTIONS> "{"
+  
+  ( <LTLASSUMPTIONS> "{" 
+  
+  (
+  {
+    //record propositions for each separate specification
+    userSpec.addThread();
+ 
+  } 
+
+ ( numToken = <INTEGER_LITERAL> )?  (threadNameToken = <IDENTIFIER> ":")? ltlNode = LTLExp() "#" {
+    
+    
+    if(numToken != null){
+    	num = Integer.parseInt(numToken.image);
+    	userSpec.setThreadNum(num);	
+    	
+    }
+    
+    if(threadNameToken != null){
+    	threadName = threadNameToken.image;   
+    	userSpec.setThreadName(threadName); 	
+    }
+
+    userSpec.setThreadSpecification(ltlNode);
+  
+ 
+  }
+  )*
+
+  "}" 
+  )?
+
+
+  (<REASSUMPTIONS> "{" 
+  ( 
+  {
+    //record propositions for each separate specification
+
+    userSpec.addThread();
+    
+  }
+  ( numToken = <INTEGER_LITERAL> )?    (threadNameToken = <IDENTIFIER> ":" )? regNode = RegExp() "#" {
+    //System.out.println("*****RegExp: "+regNode);
+    
+    if(numToken != null){
+    	num = Integer.parseInt(numToken.image);
+    	userSpec.setThreadNum(num);
+    }
+    
+    if(threadNameToken != null){
+    	threadName = threadNameToken.image;
+    	userSpec.setThreadName(threadName);
+    	
+    }
+
+    userSpec.setThreadSpecification(regNode);
+    
+  }
+  )*
+  "}"
+  )?
+
+
+  "}" )?
+
+
+  ( <STUBASSUMPTIONS> "{"
+  {
+    Token methodNameToken;
+    String className;
+    SootClass sc;
+    //SootMethod sm;
+    Body body;
+    Chain units;
+    JavaStmt stmt;
+    StubSpec stubSpec;
+  }
+
+  (
+  className = Name() "{"
+
+    ( 
+      ResultType()  
+
+      methodNameToken = <IDENTIFIER> FormalParameters() ( "[" "]" )*
+      {
+        //check whether the method is valid and get the corresponding
+        //soot method for it
+
+        //sm = sem.checkMethod(className, methodNameToken.image);
+		stubSpec = new StubSpec(className, methodNameToken.image);
+
+      }
+      ( stmt = Block() )
+        
+      {  
+        //put the Java body into the corresponding method
+        //make it active
+        body = new JavaBody();
+        //body.setMethod(sm);
+        units = body.getUnits();
+        units.add(stmt);
+        //sm.setActiveBody( body);
+        stubSpec.setBody(body);
+        userSpec.addStubSpec(stubSpec);
+
+      }
+    )*
+
+  "}"
+   )*
+
+  
+  "}"
+  )?
+}
+
+
+
+
+/**********************************************
+ * Regular Expressions
+ **********************************************/
+
+/**********************************************
+ * CHOICE
+ **********************************************/
+RENode RegExp():
+{ RENode newNode, node;  String s; Token t; int count = 0;}
+{
+
+  node = RegSeq() {
+    newNode = new RENode('|', 0, new Vector());
+    newNode.addOperand(node);
+  }
+
+  ("|" node = RegSeq() {
+        newNode.addOperand(node);
+        count ++;
+    }
+  )*
+
+  {
+    if(count == 0)
+      return node;
+    return newNode;
+  }
+
+} 
+
+/**********************************************
+ * SEQUENCE
+ **********************************************/
+RENode RegSeq():
+{ RENode newNode, node ; String s; Token t; int count = 0;}
+{
+
+  node = RegTuple(){
+    newNode = new RENode('S', 0, new Vector());
+    newNode.addOperand(node);
+  } 
+
+  (";" node = RegTuple() {
+      newNode.addOperand(node);
+      count++;
+    }
+  )*
+  {
+    if(count == 0)
+      return node;
+    return newNode;
+  }
+}
+
+/**********************************************
+ * RANGE, '*', '+', '?'
+ **********************************************/
+RENode RegTuple():
+{ RENode newNode = null;
+  RENode node; String s; Token t;}
+{
+  node = RegLeaf() 
+  (newNode = RegOp(node))?{
+   if(newNode != null)
+     return newNode;
+    return node;
+  }
+}
+
+RENode RegOp(RENode node):
+{RENode newNode; String s; Token t1, t2 = null;}
+{
+ ("^" "{" t1 = <INTEGER_LITERAL> ( "}" {
+   newNode = new RENode('^', 0, new Vector());
+   newNode.setVal(Integer.parseInt(t1.image));
+   newNode.addOperand(node);
+   return newNode;
+ }
+
+ | ( "," t2 = <INTEGER_LITERAL> "}") ) ) {
+   newNode = new RENode('^', 0, new Vector());
+   newNode.setVal(Integer.parseInt(t1.image));
+   newNode.setSecondVal(Integer.parseInt(t2.image));
+   newNode.addOperand(node);
+   return newNode;
+ }
+ | ("+"){
+   newNode = new RENode('+', 0, new Vector());
+   newNode.addOperand(node);
+   return newNode;
+ } 
+ | ("*"){
+   newNode = new RENode('*', 0, new Vector());
+   newNode.addOperand(node);
+   return newNode;
+ } 
+ | ("?"){
+   newNode = new RENode('?', 0, new Vector());
+   newNode.addOperand(node);
+   return newNode;
+ } 
+}
+/**********************************************
+ * PROPOSITION, NEGATION, (EXP)
+ **********************************************/
+RENode RegLeaf():
+{ RENode newNode, node;  String s; Token t; }
+{
+  newNode = RegProposition(){
+    return newNode;
+  }
+//  | ("!" node = RegLeaf()) {
+//    newNode = new RENode('!', 0, new Vector());
+//    newNode.addOperand(node);
+//    return newNode;
+//
+//  }
+  | ("(" newNode = RegExp() ")") {
+      return newNode;
+  }
+}
+/**********************************************
+ * PROPOSITION
+ **********************************************/
+
+
+
+RENode RegProposition():
+{ RENode newNode; 
+
+  String receiver = "";
+  String methodName = "";
+  //String args = "";
+  List args = null;
+
+  JavaExpr expr = null;
+
+  String type = "";
+  String  varName = "";
+  String  value = "";
+  
+  Token t1 = null; 
+  Token t2 = null; 
+  
+  Proposition prop;
+}
+
+{
+   //method invoke
+
+   //can also specify the receiver object here
+
+   //(LOOKAHEAD(2) t1=<IDENTIFIER> ".")?  t2 = <IDENTIFIER> (args = Arguments())* 
+   
+   expr = Proposition()
+   {
+
+  
+
+    newNode = new RENode('P', 0, null);
+    //need to validate the receiver object	
+
+    //if(t1!=null)
+    //  receiver = t1.image;
+    
+    //methodName = t2.image;
+    
+    //prop = new MethodCall(receiver, methodName, args);
+    
+    prop = new Proposition(expr);
+    
+    newNode.setProposition(prop);
+    
+    userSpec.addProposition(prop, newNode);
+
+    return newNode;
+  }
+ 
+ 
+}
+
+    
+ 
+
+
+
+
+
+/**********************************************
+ * LTL Formulas
+ **********************************************/
+
+/**********************************************
+ * IMPLICATION and OR
+ **********************************************/
+
+LTLNode LTLExp():
+{LTLNode newNode, node1; LTLNode node2 = null; }
+{
+  node1 = LTLTerm() ( LOOKAHEAD(2) (<IMPLICATION>  node2 = LTLExp()
+  {
+    if(node2!=null){
+      newNode = new LTLNode('|', 0, new LTLNode('!', 0, null, node1), node2);
+      return newNode;
+    }
+    else
+      return node1;
+
+  }
+
+  |  "|" node2 = LTLExp()) )?
+  {
+    if(node2!=null){
+      newNode = new LTLNode('|',0,node1,node2);
+      return newNode;
+    }
+    else
+      return node1;
+  }
+}
+
+
+
+/**********************************************
+ * EQUIVALENCE , AND, UNTIL, V
+ **********************************************/
+
+LTLNode LTLTerm():
+{LTLNode newNode, node1; LTLNode node2 = null; }
+{
+  
+
+   node1 = LTLFormula()
+  (<EQUIVALENCE> node2 = LTLExp()
+  {
+    if(node2!=null){
+      newNode = new LTLNode('&',0,node1,node2);
+      return newNode;
+    }
+    else
+      return node1;
+  }
+
+  | "&" node2 = LTLExp()
+  {
+    if(node2!=null){
+      newNode = new LTLNode('&',0,node1,node2);
+      return newNode;
+    }
+    else
+      return node1;
+  }
+
+  
+  | <UNTIL> node2 = LTLExp()
+  {
+    if(node2!=null){
+      newNode = new LTLNode('U',0,node1,node2);
+      return newNode;
+    }
+    else
+      return node1;
+  }
+
+  | <V> node2 = LTLExp())?
+  {
+    if(node2!=null){
+      newNode = new LTLNode('V',0,node1,node2);
+      return newNode;
+    }
+    else
+      return node1;
+  }
+
+}
+/**********************************************
+ * GLOBALLY, EVENTUALLY, NOT, "(" LTLExp ")"
+ * Proposition, true, false
+ **********************************************/
+LTLNode LTLFormula():
+{LTLNode newNode, node;}
+{
+  <GLOBALLY> node = LTLLeaf()
+  {
+    newNode = new LTLNode('V', 0, new LTLNode('F', 0, null, null), node);
+    return newNode;
+  }
+
+  | <EVENTUALLY> node = LTLLeaf()
+  {
+    newNode = new LTLNode('U', 0, new LTLNode('T', 0, null, null), node);
+    return newNode;
+
+  }
+
+  | ("!" node = LTLLeaf()) {
+    newNode = new LTLNode('!', 0, null, node);
+    return newNode;
+
+  }
+  | (<NEXT> node = LTLLeaf()) {
+    newNode = new LTLNode('X', 0, null, node);
+    return newNode;
+
+  }
+
+
+  | (<TRUE> node = LTLLeaf() )
+  {
+    return new LTLNode('T', 0, null, null);
+  }
+
+  | (<FALSE> node = LTLLeaf() )
+  {
+    return new LTLNode('F', 0, null, null);
+  }
+
+  | ("(" newNode = LTLExp() ")") {
+      return newNode;
+  }
+
+  | newNode = LTLProposition() 
+  {
+    return newNode;
+  }
+
+}
+
+/**********************************************
+ * GLOBALLY, EVENTUALLY, NOT, "(" LTLExp ")"
+ * Proposition, true, false
+ **********************************************/
+LTLNode LTLLeaf():
+{ LTLNode newNode, node;  String s; Token t; }
+{
+
+  <GLOBALLY> node = LTLFormula()
+  {
+    newNode = new LTLNode('V', 0, new LTLNode('F', 0, null, null), node);
+    return newNode;
+  }
+
+  | <EVENTUALLY> node = LTLFormula()
+  {
+    newNode = new LTLNode('U', 0, new LTLNode('T', 0, null, null), node);
+    return newNode;
+
+  }
+
+  |  newNode = LTLProposition(){
+    return newNode;
+  }
+  | ("!" node = LTLFormula()) {
+    newNode = new LTLNode('!', 0, null, node);
+    return newNode;
+
+  }
+  | (<NEXT> node = LTLFormula()) {
+    newNode = new LTLNode('X', 0, null, node);
+    return newNode;
+
+  }
+
+// TODO: check if these are needed
+//  | (<TRUE> node = LTLFormula() )
+//  {
+//    return new LTLNode('T', 0, null, null);
+//  }
+
+//  | (<FALSE> node = LTLFormula() )
+//  {
+//    return new LTLNode('F', 0, null, null);
+//  }
+
+
+  | ("(" newNode = LTLExp() ")") {
+      return newNode;
+  }
+}
+
+/**********************************************
+ * LTL PROPOSITION
+ **********************************************/
+
+LTLNode LTLProposition():
+{ LTLNode newNode; 
+
+  List args = null;
+  JavaExpr expr = null;
+  Token t1 = null; 
+  Token t2 = null; 
+  Proposition prop;
+}
+
+{
+
+   //(LOOKAHEAD(2) t1=<IDENTIFIER> ".")?  t2 = <IDENTIFIER> (args = Arguments())* 
+   
+   expr = Proposition()
+   {
+
+    newNode = new LTLNode('P', 0, null, null);
+    
+    prop = new Proposition(expr);
+    
+    newNode.setProposition(prop);
+    
+    userSpec.addProposition(prop, newNode);
+
+    return newNode;
+  }
+ 
+ 
+}
+
+
+/**********************************************
+ * Specification propositions
+ **********************************************/
+/*
+ * Slightly restricted Java expressions
+ */
+
+
+JavaExpr Proposition() :
+{
+ JavaExpr expr = null;
+ 
+}
+{
+   LOOKAHEAD(Type() <IDENTIFIER>) 
+   expr = PropLocalVariableDeclaration() 
+  {
+    return expr;
+  }
+  
+  |
+
+
+  //LOOKAHEAD( PropPrimaryExpression() AssignmentOperator() )
+  expr = PropExpression() 
+
+  {
+    return expr;
+    
+  }
+}
+
+
+JavaExpr PropExpression() :
+{JavaExpr expr = null; }
+{
+
+  LOOKAHEAD( PropPrimaryExpression() AssignmentOperator() )
+  expr = PropAssignment() {return expr;}
+
+|
+
+  
+  expr = PropPrimaryExpression() {return expr;}
+  
+  
+}
+
+JavaExpr PropAssignment() :
+{JavaExpr left, right; String op;}
+{
+  left = PropPrimaryExpression() op = AssignmentOperator() right = PropExpression()
+  {
+    //return (s1 + " " + op + " " + s2);
+    return new AssignExpr(left, op, right);
+  }
+}
+
+
+JavaExpr PropLocalVariableDeclaration():
+{
+  String type, name = null;
+  JavaExpr e = null;
+}
+{
+  type = Type() name = VariableDeclaratorId() [ "="  e = PropPrimaryExpression() ]
+  {
+    return new TypeDeclExpr(type, name, e);
+  }
+}
+
+
+JavaExpr PropPrimaryExpression() :
+{ JavaExpr e = null;
+  String s = null;
+  Token t = null;
+  Token t2  = null;
+  List args = null;
+}
+{
+  s = Literal() 
+  {
+    return new StrExpr(s);
+  }
+
+
+|
+  e = PropAllocationExpression() 
+  {
+    return e;
+  }
+
+
+
+|
+   t = <IDENTIFIER> [
+   
+   args = PropArguments(){
+     return new InvokeExpr(null, t.image, args);
+   }
+   
+   |
+   
+   "." t2 = <IDENTIFIER> args = PropArguments(){
+     return new InvokeExpr(t.image, t2.image, args);
+   
+   } 
+   
+   
+   ]
+  {
+     return new StrExpr(t.image);  
+  }
+
+
+}
+
+
+JavaExpr PropAllocationExpression() :
+{
+
+String s, s2 = null;
+List args = null;
+
+}
+{
+  LOOKAHEAD(2)
+  "new" s = PrimitiveType() s2 = ArrayDimensions() 
+  {
+    
+    logger.severe("finish array dimensions");
+    return new NewExpr(s, args);
+  }
+|
+  "new" s = Name() ( args = PropArguments() | s2 = ArrayDimensions() )
+  {
+    if(s2 != null)
+      logger.severe("finish array dimensions");
+    
+    return new NewExpr(s, args); 
+  }
+}
+
+
+List PropArguments() :
+{
+
+List args = new ArrayList();
+}
+{
+  "(" [ args = PropArgumentList() ] ")"{
+    return args;
+  } 
+}
+
+
+List PropArgumentList() :
+{
+List args = new ArrayList();
+JavaExpr s, s2 = null;}
+{
+  s = PropExpression() 
+  {
+    
+    args.add(s);
+  }
+
+( "," s2 = PropExpression(){
+
+    args.add(s2);
+
+  }
+ )*
+ {
+   
+   return args;
+ }
+}
+
+
+
+/**********************************************
+ * JAVA Constructs
+ **********************************************/
+/*
+ * Program structuring syntax follows.
+ */
+
+
+void JavaCompilationUnit() :
+{}
+{
+  [ PackageDeclaration() ]
+  ( ImportDeclaration() )*
+  ( TypeDeclaration() )*
+  <EOF>
+}
+
+void PackageDeclaration() :
+{}
+{
+  "package" Name() ";"
+}
+
+void ImportDeclaration() :
+{}
+{
+  "import" Name() [ "." "*" ] ";"
+}
+
+void TypeDeclaration() :
+{}
+{
+  LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+  ClassDeclaration()
+|
+  InterfaceDeclaration()
+|
+  ";"
+}
+
+
+/*
+ * Declaration syntax follows.
+ */
+
+void ClassDeclaration() :
+{}
+{
+  ( "abstract" | "final" | "public" )*
+  "class" <IDENTIFIER> [ "extends" Name() ] [ "implements" NameList() ]
+  "{" ( ClassBodyDeclaration() )* "}"
+}
+
+void ClassBodyDeclaration() :
+{}
+{
+  LOOKAHEAD(2)
+  StaticInitializer()
+|
+  LOOKAHEAD( [ "public" | "protected" | "private" ] Name() "(" )
+  ConstructorDeclaration()
+|
+  LOOKAHEAD( MethodDeclarationLookahead() )
+  MethodDeclaration()
+|
+  FieldDeclaration()
+}
+
+// This production is to determine lookahead only.
+void MethodDeclarationLookahead() :
+{}
+{
+  ( "public" | "protected" | "private" | "static" | "abstract" | "final" | "native" | "synchronized" )*
+  ResultType() <IDENTIFIER> "("
+}
+
+void InterfaceDeclaration() :
+{}
+{
+  ( "abstract" | "public" )*
+  "interface" <IDENTIFIER> [ "extends" NameList() ]
+  "{" ( InterfaceMemberDeclaration() )* "}"
+}
+
+void InterfaceMemberDeclaration() :
+{}
+{
+  LOOKAHEAD( MethodDeclarationLookahead() )
+  MethodDeclaration()
+|
+  FieldDeclaration()
+}
+
+void FieldDeclaration() :
+{}
+{
+  ( "public" | "protected" | "private" | "static" | "final" | "transient" | "volatile" )*
+  Type() VariableDeclarator() ( "," VariableDeclarator() )* ";"
+}
+
+
+void VariableDeclarator() :
+{}
+{
+  VariableDeclaratorId() [ "=" VariableInitializer() ]
+}
+
+
+String VariableDeclaratorId() :
+{String s; Token t;}
+{
+  t = <IDENTIFIER> {s = t.image;} (
+  "[" "]" | "[]"
+  {
+    s = s.concat("[]");
+  } 
+ )*
+ {
+   return s;
+ }
+}
+
+
+String VariableInitializer() :
+{
+  String s = "";
+  String s1 = "";
+  String s2 = "";
+  String s3 = "";
+}
+{
+  "{" [ s1 = VariableInitializer() ( LOOKAHEAD(2) "," s2 = VariableInitializer() 
+  
+    {
+      s1 = s1 + "," + s2;
+    }  
+
+    )* ] [ "," ] "}"
+  
+  {
+    return "{" + s1 + "}";
+  }
+|
+  s = Expression()
+  
+  {
+    return s;
+  }
+}
+
+void MethodDeclaration() :
+{}
+{
+  ( "public" | "protected" | "private" | "static" | "abstract" | "final" | "native" | "synchronized" )*
+  ResultType() MethodDeclarator() [ "throws" NameList() ]
+  ( Block() | ";" )
+}
+
+void MethodDeclarator() :
+{}
+{
+  <IDENTIFIER> FormalParameters() ( "[" "]" )*
+}
+
+
+void FormalParameters() :
+{}
+{
+  "(" [ FormalParameter() ( "," FormalParameter() )* ] ")"
+}
+
+void FormalParameter() :
+{}
+{
+  Type() VariableDeclaratorId()
+}
+
+void ConstructorDeclaration() :
+{}
+{
+  [ "public" | "protected" | "private" ]
+  <IDENTIFIER> FormalParameters() [ "throws" NameList() ]
+  "{" [ LOOKAHEAD(2) ExplicitConstructorInvocation() ] ( BlockStatement() )* "}"
+}
+
+void ExplicitConstructorInvocation() :
+{}
+{
+  "this" Arguments() ";"
+|
+  "super" Arguments() ";"
+}
+
+void StaticInitializer() :
+{}
+{
+  "static" Block()
+}
+
+
+/*
+ * Type, name and expression syntax follows.
+ */
+
+String Type() :
+{String s;}
+{
+  ( s = PrimitiveType() | s = Name() ) ( "[" "]" 
+  {
+    s = s.concat("[]");
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String PrimitiveType() :
+{}
+{
+  "boolean" {return "boolean";}
+|
+  "char" {return "char";}
+|
+  "byte" {return "byte";}
+|
+  "short" {return "short";}
+|
+  "int" {return "int";}
+|
+  "long" {return "long";}
+|
+  "float" {return "float";}
+|
+  "double" {return "double";}
+}
+
+void ResultType() :
+{}
+{
+  "void"
+|
+  Type()
+}
+
+String Name() :
+/*
+ * A lookahead of 2 is required below since "Name" can be followed
+ * by a ".*" when used in the context of an "ImportDeclaration".
+ */
+{String s = null;
+ Token t1, t2;
+}
+{
+  t1 = <IDENTIFIER> { s=t1.image;}
+  ( LOOKAHEAD(2) "." t2 = <IDENTIFIER> {s = s.concat("."+t2.image);} 
+  )*
+  {
+    return s;
+  }
+}
+
+void NameList() :
+{}
+{
+  Name()
+  ( "," Name()
+  )*
+}
+
+
+
+/*
+ * Expression syntax follows.
+ */
+
+String Expression() :
+{String s = null; }
+{
+
+  LOOKAHEAD( PrimaryExpression() AssignmentOperator() )
+  s = Assignment() {return s;}
+
+|
+
+  s = ConditionalExpression() {return s;}
+}
+
+String Assignment() :
+{String s1, s2, op;}
+{
+  s1 = PrimaryExpression() op = AssignmentOperator() s2 = Expression()
+  {
+    return (s1 + " " + op + " " + s2);
+  }
+}
+
+String AssignmentOperator() :
+{}
+{
+  "=" {return "=";}
+| "*=" {return "*=";}
+| "/=" {return "/=";}
+| "%=" {return "%=";}
+| "+=" {return "+=";}  
+| "-=" {return "-=";}
+| "<<=" {return "<<=";} 
+| ">>=" {return ">>=";}
+| ">>>=" {return ">>>=";} 
+| "&="  {return  "&=";}
+| "^=" {return "^=" ;}
+| "|=" {return "|=";}
+}
+
+String ConditionalExpression() :
+{String s;
+ String s2 = null;
+ String s3 = null;}
+{
+  s = ConditionalOrExpression() [ "?" s2 = Expression() ":" s3 = ConditionalExpression() 
+  {
+    s = s + " ? " + s2 + " : " + s3;
+  }
+
+]
+  {
+    return s;
+  }
+  
+}
+
+String ConditionalOrExpression() :
+{String s, s2 = null;}
+{
+  s = ConditionalAndExpression() ( "||" s2 = ConditionalAndExpression()
+  {
+    s = s + " || "+ s2;
+  }
+
+ )*
+  {
+    return s;
+  }
+}
+
+String ConditionalAndExpression() :
+{String s, s2 = null;}
+{
+  s = InclusiveOrExpression() ("&&" s2 = InclusiveOrExpression() 
+  {
+    s = s+ " && "+ s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String InclusiveOrExpression() :
+{String s, s2 = null;}
+{
+  s = ExclusiveOrExpression() ( "|" s2 = ExclusiveOrExpression() 
+  {
+    s = s + " | " + s2;
+  }
+
+)*
+  {
+    return s;
+  }
+}
+
+String ExclusiveOrExpression() :
+{String s, s2 = null;}
+{
+  s = AndExpression() ( "^" s2 = AndExpression() 
+  {
+    s = s + " ^ " + s2;
+  }
+
+)*
+  {
+    return s;
+  }
+}
+
+String AndExpression() :
+{String s, s2 = null;}
+{
+  s = EqualityExpression() ( "&" s2 = EqualityExpression() 
+  {
+    s = s + " & " + s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String EqualityExpression() :
+{String s, s2 = null;
+ Token t;}
+{
+  s = InstanceOfExpression() ( ( t = "==" | t = "!=" ) s2 = InstanceOfExpression() 
+
+  {
+    s = s + " "+ t.image + " " + s2;
+  }
+)*
+  {
+    
+    return s;
+  }
+}
+
+String InstanceOfExpression() :
+{String s, s2 = null;}
+{
+  s = RelationalExpression() [ "instanceof" s2 = Type() 
+  {
+    s = s + " instanceof " + s2;
+  }
+
+ ]
+  {
+    return s;
+  }
+}
+
+String RelationalExpression() :
+{String s, s2 = null;
+ Token t;
+}
+{
+  s = ShiftExpression() ( ( t = "<" | t= ">" | t = "<=" | t = ">=" ) 
+  s2 = ShiftExpression() 
+  {
+    s = s + " " + t.image + " " + s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String ShiftExpression() :
+{String s, s2 = null;
+ Token t;
+}
+{
+  s = AdditiveExpression() ( ( t = "<<" | t = ">>" | t = ">>>" ) 
+  s2 = AdditiveExpression() 
+  {
+    s = s + " " + t.image + " " + s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String AdditiveExpression() :
+{String s, s2 = null;
+ Token t;
+}
+{
+  s = MultiplicativeExpression() ( ( t = "+" | t = "-" ) 
+  s2 = MultiplicativeExpression() 
+  {
+    s =  s + " " + t.image + " " + s2;
+  }
+
+)*
+  {
+    return s;
+  }
+}
+
+String MultiplicativeExpression() :
+{String s, s2 = null;
+ Token t;
+}
+{
+  s = UnaryExpression() ( (t = "*" | t = "/" | t = "%" ) s2 = UnaryExpression() 
+  {
+    s = s + " " + t.image + " " + s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String UnaryExpression() :
+{String s = null;
+ Token t;
+}
+{
+  ( t = "+" | t = "-" ) s = UnaryExpression() { return (t.image + " " + s);}
+|
+  s = PreIncrementExpression() {return s;}
+|
+  s = PreDecrementExpression() {return s;}
+|
+  s = UnaryExpressionNotPlusMinus() {return s;}
+
+}
+
+String PreIncrementExpression() :
+{String s = null;}
+{
+  "++" s = PrimaryExpression() 
+  {
+    return " ++ "+ s;
+  }
+}
+
+String PreDecrementExpression() :
+{String s = null;}
+{
+  "--" s = PrimaryExpression()
+  {
+    return " -- " + s;
+  }
+}
+
+String UnaryExpressionNotPlusMinus() :
+{String s = null;
+ Token t;
+}
+{
+  ( t = "~" | t = "!" ) s = UnaryExpression()
+  {
+    return t.image + " " + s;
+  }    
+
+|
+  LOOKAHEAD( CastLookahead() )
+  s = CastExpression() {return s;}
+
+|
+  s = PostfixExpression() {return s;}
+}
+
+// This production is to determine lookahead only.  The LOOKAHEAD specifications
+// below are not used, but they are there just to indicate that we know about
+// this.
+void CastLookahead() :
+{}
+{
+  LOOKAHEAD(2)
+  "(" PrimitiveType()
+|
+  LOOKAHEAD("(" Name() "[")
+  "(" Name() "[" "]"
+|
+  "(" Name() ")" ( "~" | "!" | "(" | <IDENTIFIER> | "this" | "super" | "new" | Literal() )
+}
+
+String PostfixExpression() :
+{String s = null;
+ Token t = null;
+}
+{
+  s = PrimaryExpression()  [t = "--" | t =  "++"]
+  {
+    if(t != null)  
+      s = s + t.image;
+    return s;
+  }
+}
+
+
+String CastExpression() :
+{String s, s2 = null;
+}
+
+{
+  LOOKAHEAD(2)
+  "(" s = PrimitiveType() ( "[" "]" 
+  {
+    s = s + "[]";
+  }
+
+)* ")" {s = "(" + s + ")";}
+  s2 = UnaryExpression()
+  {
+    return s + s2;
+  }
+|
+  "(" s = Name() ( "[" "]" 
+  {
+    s = s.concat("[]");
+  }
+)* ")" {s = "(" + s + ")";} 
+
+  s2 = UnaryExpressionNotPlusMinus()
+  {
+    return s + s2;
+  }
+}
+
+
+String PrimaryExpression() :
+{String s, s2 = null;
+}
+
+{
+  s = PrimaryPrefix() ( s2 = PrimarySuffix() 
+  {
+    s = s + s2;
+  }
+)*
+  {
+    return s;
+  }
+}
+
+String PrimaryPrefix() :
+{ String expr;
+  String s = null;
+  Token t;
+}
+{
+  s = Literal() {return s;}
+|
+  s = Name() {return s;}
+|
+  "this" {return "this";}
+|
+  "super" "." t = <IDENTIFIER> {s = "super."; s = s + t.image; return s;}
+|
+  "(" s = Expression() ")" {return ("(" + s + ")");}
+|
+  s = AllocationExpression() {return s;}
+
+
+}
+
+String PrimarySuffix() :
+{String s = null;
+ Token t;}
+{
+  "[" s = Expression() "]" {return "[" + s + "]";}
+|
+  "." t = <IDENTIFIER> {s = "."; s = s + t.image; return s;}
+|
+  s = Arguments() { return s;}
+}
+
+String Literal() :
+{String s = null;
+ Token t;
+}
+{
+  t = <INTEGER_LITERAL> {return t.image;}
+|
+  t = <FLOATING_POINT_LITERAL> {return t.image;}
+|
+  t = <CHARACTER_LITERAL> {return t.image;}
+|
+  t = <STRING_LITERAL> {return t.image;}
+|
+  s = BooleanLiteral() {return s;}
+|
+  s = NullLiteral() {return s;}
+}
+
+String BooleanLiteral() :
+{}
+{
+  "true" {return "true";}
+|
+  "false" {return "false";}
+}
+
+String NullLiteral() :
+{}
+{
+  "null" {return "null";}
+}
+
+String Arguments() :
+{String s1 = ""; }
+{
+  "(" [ s1 = ArgumentList() ] ")"{
+    return "("+s1+")";
+  } 
+}
+
+
+String ArgumentList() :
+{String s, s2 = null;}
+{
+  s = Expression() 
+  {
+    //s = ast.checkTopToken(s);
+  }
+
+( "," s2 = Expression(){
+
+    //s2 = ast.checkTopToken(s2);
+    s = s+", "+s2;
+
+  }
+ )*
+ {
+   return s;
+ }
+}
+
+
+String AllocationExpression() :
+{String s1, s2 = null;}
+{
+  LOOKAHEAD(2)
+  "new" s1 = PrimitiveType() s2 = ArrayDimensions() 
+  {
+    return ("new "+s1+s2);
+  }
+|
+  "new" s1 = Name() ( s2 = Arguments() | s2 = ArrayDimensions() )
+  {
+    return ("new "+s1+s2);
+  }
+}
+
+
+/*
+ * The second LOOKAHEAD specification below is to parse to PrimarySuffix
+ * if there is an expression between the "[...]".
+ */
+String ArrayDimensions() :
+{String s=null;}
+{
+  ( LOOKAHEAD(2) "[" Expression() "]" )+ ( LOOKAHEAD(2) "[" "]" )*
+  {
+    return "check";
+  }
+}
+
+/*
+ * Statement syntax follows.
+ */
+
+JavaStmt Statement() :
+{JavaStmt newStmt = null;}
+{
+
+  LOOKAHEAD(2)
+  newStmt = LabeledStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished LabeledStatement");
+    return newStmt;
+  }
+|
+  newStmt = Block()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished Block");
+    return newStmt;
+  }
+|
+
+  newStmt = EmptyStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished emptyStatement");
+    return newStmt;
+  }
+|
+  newStmt = StatementExpression() ";"  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished StatementExpression");    
+    return newStmt;
+  }
+ 
+|
+  newStmt = SwitchStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished SwitchStatement");
+    return newStmt;
+  }
+|
+  newStmt = IfStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished IfStatement");
+    return newStmt;
+  }
+|
+  newStmt = WhileStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unifinished WhileStatement");
+    return newStmt;
+  }
+|
+  newStmt = DoStatement()   {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished DoStatement");
+    return newStmt;
+  }
+|
+  newStmt = ForStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished ForStatement");
+    return newStmt;
+  }
+|
+  newStmt = BreakStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished BreakStatement");
+    return newStmt;
+  }
+|
+  newStmt = ContinueStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished ContinueStatement");
+    return newStmt;
+  }
+|
+  newStmt = ReturnStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished ReturnStatement");
+    return newStmt;
+  }
+|
+  newStmt = ThrowStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished ThrowStatement");
+    return newStmt;
+  }
+|
+  newStmt = SynchronizedStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished SynchronizedStatement");
+    return newStmt;
+  }
+|
+  newStmt = TryStatement()  {
+    if(newStmt == null)
+      logger.severe("EnvGenParser.jj : unfinished TryStatement");
+    return newStmt;
+  }
+
+}
+
+JavaStmt LabeledStatement() :
+{JavaStmt newStmt = null;}
+{
+  <IDENTIFIER> ":" Statement()
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt Block() :
+{JavaStmt stmt, newStmt = null;}
+{
+  "{" stmt = BlockStatement() 
+      
+  ( newStmt = BlockStatement() 
+    {
+      stmt = JavaGr.newSequenceStmt(stmt, newStmt);
+        
+    }
+  )*
+  "}"
+
+  {
+    return stmt;
+  }
+
+}
+
+JavaStmt BlockStatement() :
+{JavaStmt newStmt = null;}
+{
+
+  LOOKAHEAD(Type() <IDENTIFIER>)
+  LocalVariableDeclaration() ";"
+|
+
+  newStmt = Statement()
+  {
+    return newStmt;
+  }
+}
+
+
+void LocalVariableDeclaration() :
+{}
+{
+  Type() VariableDeclarator() ( "," VariableDeclarator() )*
+}
+
+JavaStmt EmptyStatement() :
+{JavaStmt newStmt = null;}
+{
+  ";"
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt StatementExpression() :
+/*
+ * The last expansion of this production accepts more than the legal
+ * Java expansions for StatementExpression.
+ */
+{JavaStmt newStmt;
+ String s = null; 
+}
+{
+  s = PreIncrementExpression() {return JavaGr.newExprStmt(JavaGr.newStrExpr(s));}
+|
+  s = PreDecrementExpression() {return JavaGr.newExprStmt(JavaGr.newStrExpr(s));}
+|
+  LOOKAHEAD( PrimaryExpression() AssignmentOperator() )
+  s = Assignment()
+  {
+    return JavaGr.newExprStmt(JavaGr.newStrExpr(s));
+  }
+|
+  s = PostfixExpression() {return JavaGr.newExprStmt(JavaGr.newStrExpr(s));}
+
+}
+
+JavaStmt SwitchStatement() :
+{JavaStmt newStmt = null;}
+{
+  "switch" "(" Expression() ")" "{"
+    ( SwitchLabel() ( BlockStatement() )* )*
+  "}"
+  {
+    return newStmt;
+  }
+}
+
+void SwitchLabel() :
+{}
+{
+  "case" Expression() ":"
+|
+  "default" ":"
+}
+
+JavaStmt IfStatement() :
+/*
+ * The disambiguating algorithm of JavaCC automatically binds dangling
+ * else's to the innermost if statement.  The LOOKAHEAD specification
+ * is to tell JavaCC that we know what we are doing.
+ */
+{JavaStmt newStmt, thenpart, elsepart  = null;
+ String cond = null;
+}
+
+{
+  "if" "(" cond = Expression() ")" thenpart = Statement() [ LOOKAHEAD(1) "else" elsepart = Statement() ]
+  {
+    JavaExpr condExpr = JavaGr.newStrExpr(cond);
+    if(elsepart == null)
+    {
+      newStmt = JavaGr.newIfStmt(condExpr, thenpart);
+    }
+    else
+    {
+      newStmt = JavaGr.newIfElseStmt(condExpr, thenpart, elsepart);
+    }
+    return newStmt;
+  }
+}
+
+JavaStmt WhileStatement() :
+{JavaStmt newStmt = null;}
+{
+  "while" "(" Expression() ")" Statement()
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt DoStatement() :
+{JavaStmt newStmt = null;}
+{
+  "do" Statement() "while" "(" Expression() ")" ";"
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt ForStatement() :
+{JavaStmt newStmt = null;}
+{
+  "for" "(" [ ForInit() ] ";" [ Expression() ] ";" [ ForUpdate() ] ")" Statement()
+
+  {
+    return newStmt;
+  }
+}
+
+void ForInit() :
+{}
+{
+  LOOKAHEAD( Type() <IDENTIFIER> )
+  LocalVariableDeclaration()
+|
+  StatementExpressionList()
+}
+
+JavaStmt StatementExpressionList() :
+{JavaStmt newStmt = null;}
+{
+  StatementExpression() ( "," StatementExpression() )*
+  {
+    return newStmt;
+  }
+
+}
+
+void ForUpdate() :
+{}
+{
+  StatementExpressionList()
+}
+
+JavaStmt BreakStatement() :
+{JavaStmt newStmt = null;}
+{
+  "break" [ <IDENTIFIER> ] ";"
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt ContinueStatement() :
+{JavaStmt newStmt = null;}
+{
+  "continue" [ <IDENTIFIER> ] ";"
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt ReturnStatement() :
+{String s = null;}
+{
+  "return" [ s = Expression() ] ";"
+  {
+  
+    return JavaGr.newReturnStmt(JavaGr.newStrExpr(s));
+  }
+}
+
+JavaStmt ThrowStatement() :
+{JavaStmt newStmt = null;}
+{
+  "throw" Expression() ";"
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt SynchronizedStatement() :
+{JavaStmt newStmt = null;}
+{
+  "synchronized" "(" Expression() ")" Block()
+  {
+    return newStmt;
+  }
+}
+
+JavaStmt TryStatement() :
+/*
+ * Semantic check required here to make sure that at least one
+ * finally/catch is present.
+ */
+{JavaStmt newStmt = null;}
+{
+  "try" Block()
+  ( "catch" "(" FormalParameter() ")" Block() )*
+  [ "finally" Block() ]
+  {
+    return newStmt;
+  }
+}
+
+
+
+
+
+
+
