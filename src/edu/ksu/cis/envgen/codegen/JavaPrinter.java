@@ -41,7 +41,7 @@ public class JavaPrinter extends EnvPrinter{
 	String packageName = "";
 	String outputDirName = "";
 
-	/** Set to use identify the framework to be used with the generated program (OCSEGen: Open Components and Systems or JPF).  By default, JPF is used. */
+	/** Set to use identify the framework to be used with the generated program (Bandera or JPF).  By default, JPF is used. */
 	String context = "Verify";
 	
 	/**  Forces to generate TOP values as method calls, to support 
@@ -298,19 +298,17 @@ public class JavaPrinter extends EnvPrinter{
 	
 	protected void printImports(FileWriter file) {
 		//if(sc.getName().startsWith("EnvDriverThread")){
-		//any env class may use Verify or OCSEGen: Open Components and Systems choose methods
+		//any env class may use Verify or Bandera choose methods
 		if (context.equals("Verify"))
 			printf(file, "import gov.nasa.jpf.jvm.Verify;\n");
 		else
-			//printf(file, "import edu.ksu.cis.OCSEGen: Open Components and Systems.OCSEGen: Open Components and Systems;\n\n");
-			printf(file, "import edu.ksu.cis.OCSEGen: Open Components and Systems.Verify;\n");
-		// }
+			printf(file, "import edu.ksu.cis.bandera.Verify;\n");
 
 		//if(!className.equals("EnvDriver"))
 		//by default include in all the environment files
 		//(?) may want to filter out and omit in files
 		//where Abstraction class is not used
-		printf(file, "import edu.ksu.cis.OCSEGen: Open Components and Systems.Abstraction;\n\n");
+		printf(file, "import edu.ksu.cis.bandera.Abstraction;\n\n");
 	}
 	
 
@@ -922,7 +920,7 @@ public class JavaPrinter extends EnvPrinter{
 	}
 
 	public static String getRandomBoolCall() {
-		//if (context.equals("OCSEGen: Open Components and Systems"))
+		//if (context.equals("Bandera"))
 		//	return context + ".choose()";
 		//else
 		//	return context + ".randomBool()";
@@ -930,8 +928,8 @@ public class JavaPrinter extends EnvPrinter{
 	}
 
 	public static String getRandomIntCall(int n) {
-		//if (context.equals("OCSEGen: Open Components and Systems"))
-		//	return "OCSEGen: Open Components and Systems.random(" + n + ")";
+		//if (context.equals("Bandera"))
+		//	return "Bandera.random(" + n + ")";
 		//else
 		return "Verify.random(" + n + ")";
 

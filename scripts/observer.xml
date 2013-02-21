@@ -8,7 +8,7 @@
 	<property name="observer.dir" value="${examples.dir}/observer" />
 	<property name="observer.orig" value="${examples.dir}/observer/orig" />
 	<property name="observer.gen" value="${examples.dir}/observer/env" />
-	<property name="observer.configs" value="${observer.dir}/configs" />	
+	<property name="observer.configs" value="${observer.dir}/configs" />
 
 
 	<target name="compile-observer" depends="" description="compile observer example">
@@ -33,7 +33,7 @@
 
 		</antcall>
 	</target>
-	
+
 	<target name="gen-observer-ltl" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
@@ -66,7 +66,7 @@
 			<param name="target.config" value="${observer.configs}/gen-observer-stubs-se.properties" />
 		</antcall>
 	</target>
-	
+
 	<target name="gen-observer-containment-stubs" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
@@ -74,16 +74,16 @@
 			<param name="target.config" value="${observer.configs}/gen-observer-stubs-containment.properties" />
 		</antcall>
 	</target>
-	
-	
-		<target name="gen-observer-spec-stubs" depends="" description="">
-			<antcall target="gen-example">
-				<param name="target.srcdir" value="${observer.orig}" />
-				<param name="target.destdir" value="${observer.gen}" />
-				<param name="target.config" value="${observer.configs}/gen-observer-stubs-spec.properties" />
-			</antcall>
-		</target>
-	
+
+
+	<target name="gen-observer-spec-stubs" depends="" description="">
+		<antcall target="gen-example">
+			<param name="target.srcdir" value="${observer.orig}" />
+			<param name="target.destdir" value="${observer.gen}" />
+			<param name="target.config" value="${observer.configs}/gen-observer-stubs-spec.properties" />
+		</antcall>
+	</target>
+
 
 	<target name="compile-observer-gen" depends="" description="compile generated observer example">
 		<antcall target="compile-gen-example">
@@ -93,9 +93,9 @@
 
 
 	<!--*********************************************************************
-	      * slice-observer: Slicing (not currently used)
+	      * slice-observer: Slicing 
 	      *-->
-
+	<!--
 	<target name="slice-observer" depends="" description="">
 		<antcall target="slice-observer-man" /> 
 		<antcall target="slice-observer-gen" />
@@ -129,8 +129,7 @@
 			<property name="target.classpath" value="${observer.gen}:${stubs.home}" />
 			<property name="target.output" value="${observer.gen}/sliced" />
 			<property name="target.class" value="EnvDriver" />
-			<!--	<property name="target1.class" value="Register" />
-			<property name="target2.class" value="Change" /> -->
+			
 		</ant>
 	</target>
 
@@ -152,11 +151,13 @@
 			<property name="target.class" value="ObserverDriver" />
 		</ant>
 	</target>
+	-->
 
 	<!--*********************************************************************
-	      * mc-observer: [optional] Model Checking (not currently used)
+	      * mc-observer: [optional] Model Checking 
 	      *-->
 
+	<!--
 	<target name="mc-observer" depends="" description="">
 		<antcall target="mc-observer-man" />
 		<antcall target="mc-observer-gen" />
@@ -165,7 +166,7 @@
 	<target name="mc-observer-man" depends="" description="">
 		<ant antfile="jpf.xml" dir="${jpf.home}" target="run" inheritAll="false">
 			<property name="target.classpath" value="${observer.orig}" />
-			<!-- <reference torefid="target.classpath" refid="${examples.build.nongui.dir}/observer"/> -->
+			
 			<property name="target.class" value="ObserverDriver" />
 		</ant>
 	</target>
@@ -206,5 +207,5 @@
 		</ant>
 	</target>
 
-
+    -->
 </project>
