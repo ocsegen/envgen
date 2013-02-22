@@ -5,7 +5,7 @@ License: Eclipse Public License v1.0
 ----------------------------
 Requirements
 ----------------------------
-java 1.5 or higher
+java 1.5-1.6 
 ant 
 eclipse (optional)
 
@@ -44,7 +44,8 @@ Build instructions
 Using ant
 envgen>ant clean
 envgen>ant
-envgen>ant gen-observer
+envgen>ant gen-observer-driver-re
+envgen>ant gen-observer-stubs-se
 
 Using eclipse
   Build Project

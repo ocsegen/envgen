@@ -20,12 +20,12 @@
 
 
 	<target name="gen-observer" depends="" description="">
-		<antcall target="gen-observer-re" />
-		<antcall target="gen-observer-se-stubs" />
+		<antcall target="gen-observer-driver-re" />
+		<antcall target="gen-observer-stubs-se" />
 	</target>
 
 
-	<target name="gen-observer-re" depends="" description="">
+	<target name="gen-observer-driver-re" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -34,7 +34,7 @@
 		</antcall>
 	</target>
 
-	<target name="gen-observer-ltl" depends="" description="">
+	<target name="gen-observer-driver-ltl" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -43,7 +43,7 @@
 		</antcall>
 	</target>
 
-	<target name="gen-observer-univ" depends="" description="">
+	<target name="gen-observer-driver-univ" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -51,7 +51,7 @@
 		</antcall>
 	</target>
 
-	<target name="gen-observer-empty-stubs" depends="" description="">
+	<target name="gen-observer-stubs-empty" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -59,7 +59,7 @@
 		</antcall>
 	</target>
 
-	<target name="gen-observer-se-stubs" depends="" description="">
+	<target name="gen-observer-stubs-se" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -67,7 +67,7 @@
 		</antcall>
 	</target>
 
-	<target name="gen-observer-containment-stubs" depends="" description="">
+	<target name="gen-observer-stubs-containment" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
@@ -76,7 +76,7 @@
 	</target>
 
 
-	<target name="gen-observer-spec-stubs" depends="" description="">
+	<target name="gen-observer-stubs-spec" depends="" description="">
 		<antcall target="gen-example">
 			<param name="target.srcdir" value="${observer.orig}" />
 			<param name="target.destdir" value="${observer.gen}" />
