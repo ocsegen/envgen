@@ -1,0 +1,60 @@
+OCSEGen: Open Components and Systems Environment Generator
+
+License: Eclipse Public License v1.0
+
+----------------------------
+Requirements
+----------------------------
+java 1.5 or higher
+ant 
+eclipse (optional)
+
+----------------------------
+Project layout
+----------------------------
+  envgen 
+    root directory
+  src/main
+    main java sources
+  src/models
+    stubs for modeling primitives such as jpf.Verify
+    needed for compilation of generated code
+  src/examples
+     observer/orig
+       original code of the observer example
+     observer/mod    
+       generated code of the observer example
+   
+   configs
+     configuration files to specify the tool mode
+     generate drivers or stubs
+     use specifications or code analysis
+     specify unit under analysis
+   specs
+     specification files 
+     
+   scripts
+     xml scripts to run code analysis and generation for examples
+   eclipse
+     launch configs to run the tool in eclipse
+
+----------------------------
+Build instructions
+---------------------------- 
+Using ant
+envgen>ant clean
+envgen>ant
+envgen>ant gen-observer
+
+Using eclipse
+  Build Project
+  Run Configuration: EnvGen-observer-driver-re
+    generates drivers from regular expressions
+  Run Configuration: EnvGen-observer-stubs-se
+    generated stubs using side-effects analysis
+
+----------------------------
+Tool output
+---------------------------- 
+Generated code is in src/examples/observer/mod           
+              

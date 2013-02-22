@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="src-examples/observer/orig"/>
-	<classpathentry kind="src" path="src-models"/>
+	<classpathentry kind="src" output="build/main" path="src/main"/>
+	<classpathentry kind="src" output="build/models" path="src/models"/>
+	<classpathentry kind="src" output="build/examples" path="src/examples/observer/orig"/>
+	<classpathentry kind="src" output="build/examples" path="src/examples/observer/mod"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jasminclasses-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/polyglotclasses-1.3.5.jar"/>
 	<classpathentry kind="lib" path="lib/sootclasses-2.3.0.jar"/>
-	<classpathentry kind="output" path="build"/>
+	<classpathentry kind="output" path="build/main"/>
 </classpath>

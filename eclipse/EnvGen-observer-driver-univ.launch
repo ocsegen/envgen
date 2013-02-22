@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/envgen/src/edu/ksu/cis/envgen/EnvGenerator.java"/>
+<listEntry value="/envgen/src/main/edu/ksu/cis/envgen/EnvGenerator.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="edu.ksu.cis.envgen.EnvGenerator"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c src-examples/observer/configs/gen-observer-driver-univ.properties"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c configs/gen-observer-driver-univ.properties"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="envgen"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024M"/>
 </launchConfiguration>

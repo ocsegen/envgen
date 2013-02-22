@@ -14,27 +14,24 @@
 <project name="envgen" default="compile" basedir=".">
 
   <!-- ============================ COMMON SECTION ========================== -->
-
-  <!-- this is where platform specific settings come in
-       (note this has to be read first in case you want to override props) -->
  
   <property file="${build.compiler}.properties"/>
 
-  <!-- our required global properties -->
- 
   <property name="app.name"         value="envgen" />
   
-  <!-- Project directories, set according to your setup -->
-  
   <property name="envgen.home"          value="." />
-  <property name="examples.dir"         value="src-examples" />
+  <property name="src.dir"              value="src" />
+  <property name="models.dir"           value="src/models" />
+  <property name="examples.dir"         value="src/examples" />
 
   <property name="build.dir"            value="build" />
   <property name="scripts.dir"          value="scripts" />
+  <property name="configs.dir"          value="configs" />
+  <property name="specs.dir"            value="specs" />
+  <property name="lib.dir"              value="lib" />
+
   <property name="doc.dir"              value="doc"/>
   <property name="doc.api.dir"          value="${doc.dir}/api"/>
-  <property name="lib.dir"              value="lib" />
-  <property name="src.dir"              value="src" />
  
   <property name="debug"       value="on"/>
   <property name="deprecation" value="on"/>
@@ -53,10 +50,14 @@
   </path>	
 	
   <path id="envgen.run.path">
-  	<pathelement path="${envgen.home}/build"/>
+  	<pathelement path="${envgen.home}/build/main"/>
     <path refid="envgen.libs.path"/> 
     <path refid ="java.path"/> 
-  </path>	
+  </path>
+	
+  <path id="envgen.models.path">
+	  	<pathelement path="${envgen.home}/build/models"/>
+  </path>
 
   <!-- import the release targets -->
   <import file="${scripts.dir}/observer.xml"/>
@@ -85,7 +86,7 @@
 
 
   <!--*********************************************************************
-      * compile-envgen: This creates the class files for envgen
+      * compile: This creates the class files for envgen
       *-->
 	
 	 <!-- public compile -->
@@ -94,24 +95,24 @@
 	  </target>
 	
 	 <target name="compile-main" depends="init">
-	    <mkdir dir="build"/>
-	    <javac srcdir="src" destdir="build" includeantruntime="false"
+	    <mkdir dir="build/main"/>
+	    <javac srcdir="src/main" destdir="build/main" includeantruntime="false"
 	           debug="${debug}" source="${src_level}" deprecation="${deprecation}"
 	           classpathref="envgen.libs.path"/>
 	 </target>
 	
 	 <target name="compile-models" depends="init">
-	    <mkdir dir="build"/>
-	    <javac srcdir="src-models" destdir="build" includeantruntime="false"
+	    <mkdir dir="build/models"/>
+	    <javac srcdir="src/models" destdir="build/models" includeantruntime="false"
 	           debug="${debug}" source="${src_level}" deprecation="${deprecation}"
 	           classpathref="envgen.libs.path"/>
 	 </target>
 	
 	 <target name="compile-examples" depends="init">
-	    <mkdir dir="build"/>
-	    <javac srcdir="src-examples" destdir="build" includeantruntime="false"
+	    <mkdir dir="build/examples"/>
+	    <javac srcdir="src/examples" destdir="build/examples" includeantruntime="false"
 	           debug="${debug}" source="${src_level}" deprecation="${deprecation}"
-	           classpathref="envgen.libs.path"/>
+	           classpathref="envgen.models.path"/>
 	 </target>
 
 
@@ -229,6 +230,7 @@
 	  description="">
     <delete dir="${build.dir}" />
     <delete dir="${doc.api.dir}" />
+  	<!--<delete dir="${examples.dir}/observer/mod/env" />-->
     <delete>
       <fileset dir="." includes="**/*~" defaultexcludes="no" />
       <fileset dir="." includes="**/*.bak" defaultexcludes="no" />

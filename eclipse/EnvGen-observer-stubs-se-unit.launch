@@ -2,13 +2,13 @@
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <stringAttribute key="bad_container_name" value="/envgen/ecl"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/envgen/src/edu/ksu/cis/envgen/EnvGenerator.java"/>
+<listEntry value="/envgen/src/main/edu/ksu/cis/envgen/EnvGenerator.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="edu.ksu.cis.envgen.EnvGenerator"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c src-examples/observer/configs/gen-observer-stubs-se-unit.properties"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-c configs/gen-observer-stubs-se-unit.properties"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="envgen"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024M"/>
 </launchConfiguration>

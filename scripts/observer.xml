@@ -7,8 +7,8 @@
 
 	<property name="observer.dir" value="${examples.dir}/observer" />
 	<property name="observer.orig" value="${examples.dir}/observer/orig" />
-	<property name="observer.gen" value="${examples.dir}/observer/env" />
-	<property name="observer.configs" value="${observer.dir}/configs" />
+	<property name="observer.gen" value="${examples.dir}/observer/mod" />
+	<property name="observer.configs" value="${configs.dir}" />
 
 
 	<target name="compile-observer" depends="" description="compile observer example">
