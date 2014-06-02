@@ -78,7 +78,7 @@ public class EnvCallGraphCHA extends EnvCallGraph {
 		opt.put("full-resolver","true");
 		opt.put("verbose", false);
 		
-		List entryPoints = getAllEntryMethods();
+		List<SootMethod> entryPoints = getAllEntryMethods();
 		logger.info("entry points: "+entryPoints);
 		Scene.v().setEntryPoints(entryPoints);
 		

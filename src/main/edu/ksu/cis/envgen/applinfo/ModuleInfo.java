@@ -26,18 +26,20 @@ import soot.util.Chain;
 import soot.Value;
 
 public abstract class ModuleInfo {
+	/** Table of module classes, allowing to identify classes by their name. 
+	 * This is needed for creation of model classes for the actual classes. */
+	Map<String, SootClass> classes = new HashMap<String, SootClass>();
 	
-	Map classes = new HashMap();
+	/** List of module methods. */
+	List<SootMethod> methods = new ArrayList<SootMethod>();
 	
-	List methods = new ArrayList();
-	
-	List fields;
+	List<SootField> fields;
 	
 	//	public static fields
-	List globals;
+	List<SootField> globals;
 	
 	//	public static final fields
-	Map constants = new HashMap();
+	Map<SootField, Value> constants = new HashMap<SootField, Value>();
 
 	/** Auxiliary map */
 	Map attributes = new HashMap();
@@ -57,16 +59,16 @@ public abstract class ModuleInfo {
 		return false;
 	}
 	
-	public Collection getClasses(){
+	public Collection<SootClass> getClasses(){
 		return classes.values();
 	}
 
-	public Set getClassNames(){
+	public Set<String> getClassNames(){
 		return classes.keySet();
 	}
 	
-	public Collection getClassNamesCopy(){
-		return new ArrayList(classes.keySet());
+	public Collection<String> getClassNamesCopy(){
+		return new ArrayList<String>(classes.keySet());
 	}
 	
 	public SootClass getClass(String className){
@@ -74,11 +76,11 @@ public abstract class ModuleInfo {
 	}
 	
 	public SootClass getClassByShortName(String type){
-		Set classNames = getClassNames();
+		Set<String> classNames = getClassNames();
 		String name;
 		SootClass sc;
-		for(Iterator ni = classNames.iterator(); ni.hasNext();){
-			name = (String)ni.next();
+		for(Iterator<String> ni = classNames.iterator(); ni.hasNext();){
+			name = ni.next();
 			if(name.equals(type) || JavaPrinter.getShortName(name).equals(type)){
 				sc = getClass(name);
 				return sc;
@@ -101,17 +103,19 @@ public abstract class ModuleInfo {
 	//	classes.put(name, ec);
 	//}
 	
-	public List getMethods() {
+	public List<SootMethod> getMethods() {
 		return methods;
 	}
 	
 	
-	public void setMethods(List envMethods){
+	public void setMethods(List<SootMethod> envMethods){
 		this.methods = envMethods;
 	}
 	
 	public void addMethod(SootMethod sm){
 		//TODO: check for dup?
+		System.out.println("Adding method to unit: "+ sm);
+		
 		methods.add(sm);
 	}
 	
@@ -134,7 +138,7 @@ public abstract class ModuleInfo {
 		return (Value)constants.get(sf);
 	}
 	
-	public Set getConstants(){
+	public Set<SootField> getConstants(){
 		return constants.keySet();
 	}
 	
@@ -154,18 +158,18 @@ public abstract class ModuleInfo {
 	 * Builds a list of unit static fields (unit globals).
 	 */
 	//TODO: move to the interface finder
-	public List findGlobals() {
-		List globals = new ArrayList();
+	public List<SootField> findGlobals() {
+		List<SootField> globals = new ArrayList<SootField>();
 		SootClass internalClass;
 
-		for (Iterator it = getClasses().iterator(); it.hasNext();) {
-			internalClass = (SootClass) it.next();
-			Chain fields = internalClass.getFields();
-			Iterator fi = fields.iterator();
+		for (Iterator<SootClass> it = getClasses().iterator(); it.hasNext();) {
+			internalClass = it.next();
+			Chain<SootField> fields = internalClass.getFields();
+			Iterator<SootField> fi = fields.iterator();
 			SootField sf = null;
 			Type type = null;
 			while (fi.hasNext()) {
-				sf = (SootField) fi.next();
+				sf = fi.next();
 				if (Modifier.isStatic(sf.getModifiers())
 						&& Modifier.isPublic(sf.getModifiers())) {
 					type = sf.getType();
@@ -185,8 +189,8 @@ public abstract class ModuleInfo {
 	 */
 	public boolean includesLibClasses() {
 
-		for (Iterator it = getClassNames().iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Iterator<String> it = getClassNames().iterator(); it.hasNext();) {
+			String key = it.next();
 			if (key.startsWith("java") || key.startsWith("sun.")
 					|| key.startsWith("org.") || key.startsWith("com.")
 					|| key.startsWith("edu.") || key.startsWith("de.")
@@ -205,7 +209,7 @@ public abstract class ModuleInfo {
 	 */
 	public boolean isModuleType(SootClass sc) {
 		String className = sc.getName();
-		SootClass unitClass;
+		//SootClass unitClass;
 		if(classes.containsKey(className))
 			return true;
 
@@ -219,8 +223,8 @@ public abstract class ModuleInfo {
 	public boolean isModuleSuperType(SootClass sc) {
 		SootClass unitClass;
 
-		for (Iterator it = getClasses().iterator(); it.hasNext();) {
-			unitClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = getClasses().iterator(); it.hasNext();) {
+			unitClass = it.next();
 			if (isSubType(unitClass, sc)) {
 				// as soon as we find a parameter
 				// with a type that comes from unit
@@ -256,8 +260,8 @@ public abstract class ModuleInfo {
 		String result = "";
 		SootClass sc;
 
-		for (Iterator it = classes.values().iterator(); it.hasNext();) {
-			sc = (SootClass) it.next();
+		for (Iterator<SootClass> it = classes.values().iterator(); it.hasNext();) {
+			sc = it.next();
 			result = result +(
 				"\n Class <"
 					+ sc.getName()

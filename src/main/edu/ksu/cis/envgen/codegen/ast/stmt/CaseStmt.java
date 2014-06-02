@@ -31,6 +31,12 @@ public class CaseStmt extends JavaStmt {
 		this.next = next;
 	}
 	
+    public Object clone()
+    {
+        return new CaseStmt(value, body, next);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 		for (int i = 0; i < shift; i++)
 			printf(file, "  ");

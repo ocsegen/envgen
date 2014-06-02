@@ -37,7 +37,7 @@ public class Configuration {
 	protected CodeGenerator cg;
 	protected EnvPrinter ep;
 
-	protected Map checkedInstanceCache = new HashMap();
+	protected Map<String, Object> checkedInstanceCache = new HashMap<String, Object>();
 
 	protected String specFileName;
 
@@ -123,8 +123,8 @@ public class Configuration {
 			aa.setOptions(properties);
 
 		cg = (CodeGenerator) createInstance(CodeGenerator.class);
-		assert cg != null;
-		cg.setOptions(properties);
+		if(cg != null)
+			cg.setOptions(properties);
 
 		ep = (EnvPrinter) createInstance(EnvPrinter.class);
 		// for now, we allow to use a default printer
@@ -234,11 +234,11 @@ public class Configuration {
 			// TODO: use SourceLocator directly
 			// SourceLocator sourceLocator = SourceLocator.v();
 			// List fileNames = sourceLocator.getClassesUnder(pathName);
-			List fileNames = getClassesUnder(pathName);
+			List<String> fileNames = getClassesUnder(pathName);
 			logger.info("fileNames: " + fileNames);
 
-			for (Iterator fi = fileNames.iterator(); fi.hasNext();) {
-				String fileName = (String) fi.next();
+			for (Iterator<String> fi = fileNames.iterator(); fi.hasNext();) {
+				String fileName = fi.next();
 
 				try {
 					(Scene.v()).loadClassAndSupport(fileName);
@@ -258,11 +258,11 @@ public class Configuration {
 	}
 
 	// TODO: taken from soot.SourceLocator
-	public List getClassesUnder(String aPath) {
-		List fileNames = new ArrayList();
+	public List<String> getClassesUnder(String aPath) {
+		List<String> fileNames = new ArrayList<String>();
 
 		if (isJar(aPath)) {
-			List inputExtensions = new ArrayList(2);
+			List<String> inputExtensions = new ArrayList<String>(2);
 			inputExtensions.add(".class");
 			inputExtensions.add(".jimple");
 			inputExtensions.add(".java");
@@ -301,11 +301,11 @@ public class Configuration {
 
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].isDirectory()) {
-					List l = getClassesUnder(aPath + File.separatorChar
+					List<String> l = getClassesUnder(aPath + File.separatorChar
 							+ files[i].getName());
-					Iterator it = l.iterator();
+					Iterator<String> it = l.iterator();
 					while (it.hasNext()) {
-						String s = (String) it.next();
+						String s = it.next();
 						fileNames.add(files[i].getName() + "." + s);
 					}
 				} else {
@@ -380,7 +380,7 @@ public class Configuration {
 
 		String ignoreAnalyzingStr = properties.getProperty("ignoreAnalyzing");
 		if (ignoreAnalyzingStr != null) {
-			List excludedPackages = new ArrayList();
+			List<String> excludedPackages = new ArrayList<String>();
 			excludedPackages.add(ignoreAnalyzingStr);
 
 			//excludedPackages.add("java.");

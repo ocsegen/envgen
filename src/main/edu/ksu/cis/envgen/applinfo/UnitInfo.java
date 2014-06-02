@@ -16,11 +16,6 @@ import java.util.logging.Logger;
 import soot.*;
 
 public class UnitInfo extends ModuleInfo{
-	//** Table of unit classes */
-	//Map classes = new HashMap();
-	
-	/** List of analyzable unit methods */
-	//List methods = new ArrayList();
 
 	Logger logger = Logger.getLogger("edu.ksu.cis.envgen.applinfo");
 	
@@ -32,11 +27,14 @@ public class UnitInfo extends ModuleInfo{
 	public void addMethodToClass(
 			SootClass markedClass,
 			SootMethod externalMethod) {
+		
 		//not used yet
+		logger.info("finish implementation");
 	}
 	
 	public void addFieldToClass(SootClass sc, SootField sf){
 		//not used yet
+		logger.info("finish implementation");
 	}
 	
 

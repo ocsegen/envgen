@@ -25,6 +25,12 @@ public class SwitchStmt extends JavaStmt {
 		this.stmt = stmt;
 	}
 	
+    public Object clone()
+    {
+        return new SwitchStmt(expr, stmt);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 
 		for (int i = 0; i < shift; i++)

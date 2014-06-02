@@ -37,16 +37,16 @@ public class EnvHierarchy {
 
 	//Map classToSubclasses;
 
-	Map interfaceToSubinterfaces;
+	Map<String, List> interfaceToSubinterfaces;
 
 	/** To Dir Subinterfaces */
-	Map interfaceToDirSubinterfaces;
+	Map<String, List> interfaceToDirSubinterfaces;
 
 	
-	Map interfaceToImplementors;
+	Map<String, List> interfaceToImplementors;
 
 	/** To Dir Implementors */
-	public Map interfaceToDirImplementors;
+	public Map<String, List> interfaceToDirImplementors;
 
 	Logger logger = Logger.getLogger("envgen.applinfo");
 
@@ -55,43 +55,43 @@ public class EnvHierarchy {
 		this.env = env;
 
 		// TODO: see if other maps are needed
-		interfaceToDirSubinterfaces = new HashMap();
+		interfaceToDirSubinterfaces = new HashMap<String, List>();
 
-		interfaceToDirImplementors = new HashMap();
+		interfaceToDirImplementors = new HashMap<String, List>();
 		
 	}
 
-	public Map getDirImplementorsMap(){
+	public Map<String, List> getDirImplementorsMap(){
 		return interfaceToDirImplementors;
 	}
 	
-	public Map getDirSubinterfacesMap(){
+	public Map<String, List> getDirSubinterfacesMap(){
 		return interfaceToDirSubinterfaces;
 	}
 	
-	public List getDirImplementorsOf(String interfcName) {
-		return (List) interfaceToDirImplementors.get(interfcName);
+	public List<SootClass> getDirImplementorsOf(String interfcName) {
+		return interfaceToDirImplementors.get(interfcName);
 	}
 
-	public List getDirImplementorsOf(SootClass sc) {
+	public List<SootClass> getDirImplementorsOf(SootClass sc) {
 		String interfcName = sc.getName();
-		return (List) interfaceToDirImplementors.get(interfcName);
+		return interfaceToDirImplementors.get(interfcName);
 	}
 	
-	public List getDirSubinterfacesOf(String interfcName) {
-		return (List) interfaceToDirSubinterfaces.get(interfcName);
+	public List<SootClass> getDirSubinterfacesOf(String interfcName) {
+		return interfaceToDirSubinterfaces.get(interfcName);
 	}
 
-	public List getDirSubinterfacesOf(SootClass sc) {
+	public List<SootClass> getDirSubinterfacesOf(SootClass sc) {
 		String interfcName = sc.getName();
-		return (List) interfaceToDirSubinterfaces.get(interfcName);
+		return interfaceToDirSubinterfaces.get(interfcName);
 	}
 	
 
 	public void addDirImplementor(String interfcName, SootClass markedClass) {
-		List implementors = (List) interfaceToDirImplementors.get(interfcName);
+		List<SootClass> implementors = interfaceToDirImplementors.get(interfcName);
 		if (implementors == null) {
-			implementors = new ArrayList();
+			implementors = new ArrayList<SootClass>();
 			interfaceToDirImplementors.put(interfcName, implementors);
 		}
 		if(!implementors.contains(markedClass))
@@ -101,7 +101,7 @@ public class EnvHierarchy {
 
 	public void addInterface(String interfcName) {
 		if(!interfaceToDirImplementors.containsKey(interfcName))
-			interfaceToDirImplementors.put(interfcName, new ArrayList());
+			interfaceToDirImplementors.put(interfcName, new ArrayList<SootClass>());
 		
 		
 		if(!interfaceToDirSubinterfaces.containsKey(interfcName))
@@ -114,9 +114,9 @@ public class EnvHierarchy {
 	}
 	
 	public void addDirSubinterface(String interfcName, SootClass markedClass) {
-		List implementors = (List) interfaceToDirSubinterfaces.get(interfcName);
+		List<SootClass> implementors = interfaceToDirSubinterfaces.get(interfcName);
 		if (implementors == null) {
-			implementors = new ArrayList();
+			implementors = new ArrayList<SootClass>();
 			interfaceToDirSubinterfaces.put(interfcName, implementors);
 		}
 		if(!implementors.contains(markedClass))
@@ -125,28 +125,28 @@ public class EnvHierarchy {
 	}
 	
 	
-	public List getImplementorsOf(String interfcName){
+	public List<SootClass> getImplementorsOf(String interfcName){
 		//TODO: to avoid recalculating, store in the map
 
 		String name = JavaPrinter.getActualName(interfcName);
-		List implementers = getDirImplementorsOf(name);
+		List<SootClass> implementers = getDirImplementorsOf(name);
 	
 		
-		List subinterfaces = getDirSubinterfacesOf(name);
+		List<SootClass> subinterfaces = getDirSubinterfacesOf(name);
 		if(subinterfaces == null){
 			logger.warning("Null Subinterfaces for class : "+name);
 			return implementers;
 		}
 
 		SootClass sub;
-		for(Iterator it = subinterfaces.iterator(); it.hasNext();){
-			sub = (SootClass)it.next();
-			List subImpl = getImplementorsOf(sub.getName());
+		for(Iterator<SootClass> it = subinterfaces.iterator(); it.hasNext();){
+			sub = it.next();
+			List<SootClass> subImpl = getImplementorsOf(sub.getName());
 			
 			
 			//implementers.addAll(subImpl);
-			for(Iterator it2 = subImpl.iterator(); it2.hasNext();){
-				SootClass sub2 = (SootClass)it2.next();
+			for(Iterator<SootClass> it2 = subImpl.iterator(); it2.hasNext();){
+				SootClass sub2 = it2.next();
 				if(!implementers.contains(sub2))
 					implementers.add(sub2);
 			}
@@ -155,7 +155,7 @@ public class EnvHierarchy {
 		return implementers;
 	}
 
-	public List getImplementorsOf(SootClass sc){
+	public List<SootClass> getImplementorsOf(SootClass sc){
 		String interfcName = sc.getName();
 		return getImplementorsOf(interfcName);
 	}
@@ -170,10 +170,10 @@ public class EnvHierarchy {
 	 * @return A list of the interfaces that are directly implements by sc and
 	 *         the super interfaces of these interfaces.
 	 */
-	public List getSuperInterfaceClasses(SootClass sc) {
+	public List<SootClass> getSuperInterfaceClasses(SootClass sc) {
 		// the list that will contain the interfaces that are directly
 		// implements by sc and the super interfaces of these interfaces
-		ArrayList superInterfaceClasses = new ArrayList();
+		ArrayList<SootClass> superInterfaceClasses = new ArrayList<SootClass>();
 
 		// get the interfaces that are directly implemented by sc
 		Chain directInterfaces = sc.getInterfaces();

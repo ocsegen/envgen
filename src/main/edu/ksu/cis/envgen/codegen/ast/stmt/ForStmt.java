@@ -25,6 +25,12 @@ public class ForStmt extends JavaStmt {
 		this.cond = cond;
 		this.body = body;
 	}
+	
+    public Object clone()
+    {
+        return new ForStmt(cond, body);
+        
+    }
 
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 

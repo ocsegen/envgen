@@ -171,12 +171,11 @@ public abstract class JavaDriverGenerator extends AbstractDriverGenerator {
 		//if(!envTable.containsKey(javaLangThread.getName()))
 		//envTable.put(javaLangThread.getName(), javaLangThread);
 
-		List paramTypes = new ArrayList();
+		List<Type> paramTypes = new ArrayList<Type>();
 
+		Body constrBody = genThreadConstructorBody(driverThread, paramTypes);
 		SootMethod constructor = new SootMethod("<init>", paramTypes, VoidType
 				.v(), Modifier.PUBLIC);
-
-		Body constrBody = genThreadConstructorBody(driverThread, constructor);
 
 		driverThread.addMethod(constructor);
 		constrBody.setMethod(constructor);
@@ -184,11 +183,12 @@ public abstract class JavaDriverGenerator extends AbstractDriverGenerator {
 		return driverThread;
 	}
 
-	public Body genThreadConstructorBody(SootClass driverThread,
-			SootMethod method) {
+	public Body genThreadConstructorBody(SootClass driverThread, List<Type> paramTypes) {
 
 		Body constrBody = new JavaBody();
-		Chain constrUnits = constrBody.getUnits();
+		Chain<Unit> constrUnits = constrBody.getUnits();
+//		List<Type> paramTypes = method.getParameterTypes();
+//		List<Type> paramTypes = new ArrayList<Type>();
 		
 		if(instantiations == null || instantiations.isEmpty())
 			instantiations = genDefaultInstantiations();
@@ -215,7 +215,6 @@ public abstract class JavaDriverGenerator extends AbstractDriverGenerator {
 					new StrExpr("param" + count))));
 				count++;
 				//get Type of this class and put it into the paramTypes List
-				List paramTypes = method.getParameterTypes();
 				paramTypes.add(declType);
 			}
 			else{ 

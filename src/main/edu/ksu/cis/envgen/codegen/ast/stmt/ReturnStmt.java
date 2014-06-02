@@ -28,6 +28,12 @@ public class ReturnStmt extends JavaStmt {
 		this.value = expr;
 	}
 	
+    public Object clone()
+    {
+        return new ReturnStmt(value);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 		
 		for (int i = 0; i < shift; i++)

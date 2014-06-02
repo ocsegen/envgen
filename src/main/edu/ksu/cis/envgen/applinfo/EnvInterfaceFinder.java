@@ -185,20 +185,19 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		//all statements with external references
 		//put all external classes into envTable
 
-		for (Iterator it = unit.getClasses().iterator(); it.hasNext();) {
-			internalClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = unit.getClasses().iterator(); it.hasNext();) {
+			internalClass = it.next();
 			String className = internalClass.getName();
 			logger.fine("Unit class: " + className);
 			
-			
-
+			//TODO: fill out env with the unit info?
 			if (unitAnalysis) {
 				SootClass markedClass = env.addClass(internalClass);
-				List methods = internalClass.getMethods();
+				List<SootMethod> methods = internalClass.getMethods();
 				logger.fine("unit methods: "+methods);
 				SootMethod internalMethod;
-				for (Iterator mi = methods.iterator(); mi.hasNext();) {
-					internalMethod = (SootMethod) mi.next();
+				for (Iterator<SootMethod> mi = methods.iterator(); mi.hasNext();) {
+					internalMethod = mi.next();
 					env.addMethodToClass(markedClass, internalMethod);
 				}
 
@@ -241,34 +240,34 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	 */
 	protected void envCheckInterfaces(SootClass internalClass) {
 		if (internalClass.getInterfaceCount() > 0) {
-			Chain interfaces = internalClass.getInterfaces();
+			Chain<SootClass> interfaces = internalClass.getInterfaces();
 			SootClass interfc;
-			for (Iterator ii = interfaces.iterator(); ii.hasNext();) {
-				interfc = (SootClass) ii.next();
+			for (Iterator<SootClass> ii = interfaces.iterator(); ii.hasNext();) {
+				interfc = ii.next();
 				envCheck(interfc);
 			}
 		}
 	}
 
 	protected void envCheckFields(SootClass internalClass) {
-		Chain fields = internalClass.getFields();
+		Chain<SootField> fields = internalClass.getFields();
 		SootField internalField;
-		for (Iterator fi = fields.iterator(); fi.hasNext();) {
-			internalField = (SootField) fi.next();
+		for (Iterator<SootField> fi = fields.iterator(); fi.hasNext();) {
+			internalField = fi.next();
 			envCheckField(internalField);
 		}
 	}
 
 	protected void envCheckMethods(SootClass internalClass) {
 		SootMethod internalMethod;
-		List methods = internalClass.getMethods();
+		List<SootMethod> methods = internalClass.getMethods();
 		//System.out.println("chainList: "+methodsList);
 
 		//check the concurrent modification exception here ??
 		//Iterator mi = methodsList.snapshotIterator();
 		//System.out.println("methodsList: "+mi);
-		for (Iterator mi = methods.iterator(); mi.hasNext();) {
-			internalMethod = (SootMethod) mi.next();
+		for (Iterator<SootMethod> mi = methods.iterator(); mi.hasNext();) {
+			internalMethod = mi.next();
 
 			envCheckMethod(internalMethod);
 		}
@@ -327,13 +326,13 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		
 		logger.fine("checking locals of: " + sm);
 		
-		Chain locals = jb.getLocals();
+		Chain<Local> locals = jb.getLocals();
 		Local l = null;
 		Type localType;
 		SootClass localClass;
 
-		for (Iterator li = locals.iterator(); li.hasNext();) {
-			l = (Local) li.next();
+		for (Iterator<Local> li = locals.iterator(); li.hasNext();) {
+			l = li.next();
 			localType = l.getType();
 			localClass = Util.getClass(localType);
 			if (localClass != null)
@@ -353,8 +352,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		
 		logger.fine("checking statements of: " + internalMethod);
 		
-		PatchingChain stmtList = jb.getUnits();
-		for (Iterator si = stmtList.iterator(); si.hasNext();) {
+		PatchingChain<Unit> stmtList = jb.getUnits();
+		for (Iterator<Unit> si = stmtList.iterator(); si.hasNext();) {
 			Stmt s = (Stmt) si.next();
 			logger.finer("statement: "+s+" is "+s.getClass().getName());
 				
@@ -408,7 +407,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 
 			if (receiverType instanceof RefType) {
 				// since Type might be Null
-				Collection targets = null;
+				Collection<SootMethod> targets = null;
 				targets =
 					callGraph.getTargetsOf(
 						site,
@@ -418,8 +417,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 
 				logger.fine("Invoke expr <" + expr + "> has targets:");
 
-				for (Iterator it = targets.iterator(); it.hasNext();) {
-					sm = (SootMethod) it.next();
+				for (Iterator<SootMethod> it = targets.iterator(); it.hasNext();) {
+					sm = it.next();
 					logger.fine("target: " + sm);
 					envCheckMethodSignature(sm);
 				}
@@ -496,11 +495,11 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	 * them in the <codeenvTable<code>.
 	 */
 	protected void envCheckParams(SootMethod externalMethod) {
-		List paramTypes = externalMethod.getParameterTypes();
+		List<Type> paramTypes = externalMethod.getParameterTypes();
 		Type paramType = null;
 		SootClass paramTypeClass;
-		for (Iterator pi = paramTypes.iterator(); pi.hasNext();) {
-			paramType = (Type) pi.next();
+		for (Iterator<Type> pi = paramTypes.iterator(); pi.hasNext();) {
+			paramType = pi.next();
 			paramTypeClass = Util.getClass(paramType);
 			if (paramTypeClass != null)
 				envCheck(paramTypeClass);
@@ -514,10 +513,10 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	 * records them in the <code>envTable</code>.
 	 */
 	protected void envCheckExceptions(SootMethod externalMethod) {
-		List exceptions = externalMethod.getExceptions();
+		List<SootClass> exceptions = externalMethod.getExceptions();
 		SootClass except = null;
-		for (Iterator ei = exceptions.iterator(); ei.hasNext();) {
-			except = (SootClass) ei.next();
+		for (Iterator<SootClass> ei = exceptions.iterator(); ei.hasNext();) {
+			except = ei.next();
 			envCheck(except);
 		}
 	}
@@ -617,8 +616,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 				"-------------Setting hierarchy for environment (marked) classes");
 		SootClass externalClass, markedClass, parent, interfc;
 		String realName, modelName;
-		for (Iterator it = env.getClasses().iterator(); it.hasNext();) {
-			markedClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = env.getClasses().iterator(); it.hasNext();) {
+			markedClass = it.next();
 			
 			realName = JavaPrinter.getActualName(markedClass.getName());
 
@@ -644,15 +643,15 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 				
 				//List interfaces = envHierarchy.getSuperInterfaceClasses(externalClass);
 
-				Chain interfaces = externalClass.getInterfaces();
+				Chain<SootClass> interfaces = externalClass.getInterfaces();
 				logger.fine(
 						"External class corresponding to: "
 							+ markedClass.getName()
 							+ " has interfaces: "
 							+ interfaces);
-				Iterator ii = interfaces.iterator();
+				Iterator<SootClass> ii = interfaces.iterator();
 				while (ii.hasNext()) {
-					interfc = (SootClass) ii.next();
+					interfc = ii.next();
 
 					//add interface only if it's already in the environment
 					//if not, don't bother
@@ -691,8 +690,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		String realName;
 		
 		//add implementations that are in the unit
-		for (Iterator it = unit.getClasses().iterator(); it.hasNext();) {
-			markedClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = unit.getClasses().iterator(); it.hasNext();) {
+			markedClass = it.next();
 			
 			realName = markedClass.getName();
 
@@ -708,15 +707,15 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 				//Chain interfaces = getInterfaces(externalClass);
 				//List interfaces = envHierarchy.getSuperInterfaceClasses(markedClass);
 
-				Chain interfaces = markedClass.getInterfaces();
+				Chain<SootClass> interfaces = markedClass.getInterfaces();
 				logger.fine(
 						"External class corresponding to: "
 							+ markedClass.getName()
 							+ " has interfaces: "
 							+ interfaces);
-				Iterator ii = interfaces.iterator();
+				Iterator<SootClass> ii = interfaces.iterator();
 				while (ii.hasNext()) {
-					interfc = (SootClass) ii.next();
+					interfc = ii.next();
 
 					//add interface only if it's already in the environment
 					//if not, don't bother
@@ -738,10 +737,10 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	}
 
 	protected void initConstants(){
-		Set constants = env.getConstants();
+		Set<SootField> constants = env.getConstants();
 		SootField sf;
-		for (Iterator fi = constants.iterator(); fi.hasNext();){
-			sf = (SootField)fi.next();
+		for (Iterator<SootField> fi = constants.iterator(); fi.hasNext();){
+			sf = fi.next();
 			
 			SootClass externalClass = sf.getDeclaringClass();
 			
@@ -765,8 +764,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 				Util.printMethodBody(clinitMethod, jb);
 			
 
-			PatchingChain stmtList = jb.getUnits();
-			for (Iterator si = stmtList.iterator(); si.hasNext();) {
+			PatchingChain<Unit> stmtList = jb.getUnits();
+			for (Iterator<Unit> si = stmtList.iterator(); si.hasNext();) {
 				Stmt s = (Stmt) si.next();
 				logger.finer("statement: "+s+" is "+s.getClass().getName());
 					
@@ -806,8 +805,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 			String modelName = interfcName;
 			if(env.containsClass(interfcName))
 				modelName = JavaPrinter.getPrefixedName(interfcName);
-			List implementors = envHierarchy.getDirImplementorsOf(interfcName);
-			List subinterfaces = envHierarchy.getDirSubinterfacesOf(interfcName);
+			List<SootClass> implementors = envHierarchy.getDirImplementorsOf(interfcName);
+			List<SootClass> subinterfaces = envHierarchy.getDirSubinterfacesOf(interfcName);
 			
 			
 			//TODO: an interface that has subinterfaces should not

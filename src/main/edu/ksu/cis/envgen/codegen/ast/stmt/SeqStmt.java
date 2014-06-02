@@ -24,6 +24,12 @@ public class SeqStmt extends JavaStmt {
 		this.second = second;
 	}
 
+    public Object clone()
+    {
+        return new SeqStmt(first, second);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 		if (shift > 0)
 			first.printToFile(file, printer, shift);

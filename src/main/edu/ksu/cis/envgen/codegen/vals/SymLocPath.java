@@ -311,9 +311,10 @@ public class SymLocPath extends SymLoc {
 		String rootAccessorsStr = getAccessorsString(rootStr);
 
 		String modifiedAccessorStr = "";
+		
 		if (modifiedAccessor != null)
-			modifiedAccessorStr = "/mod: "
-					+ modifiedAccessor.toString();
+			//modifiedAccessorStr = "/mod: "+ modifiedAccessor.toString();
+		    modifiedAccessorStr = modifiedAccessor.toString();
 
 		if (kind == CONCRETE_LOC) {
 			return rootAccessorsStr + modifiedAccessorStr;

@@ -70,10 +70,10 @@ public class UnitInterfaceFinder extends InterfaceFinder {
 		ModuleInfo refinedUnit = new UnitInfo();
 		Map attributes = refinedUnit.getAttributes();
 		
-		List implementors = new ArrayList();
+		List<SootClass> implementors = new ArrayList<SootClass>();
 		
-		for (Iterator it = unit.getClasses().iterator(); it.hasNext();) {
-			internalClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = unit.getClasses().iterator(); it.hasNext();) {
+			internalClass = it.next();
 			if(!applInfo.isRelevantClass(internalClass))
 				continue;
 			
@@ -91,10 +91,11 @@ public class UnitInterfaceFinder extends InterfaceFinder {
 			refinedUnit.addClass(internalClass);
 			//TODO: handle inherited methods (?)
 
-			List methodsList = internalClass.getMethods();
+			List<SootMethod> methodsList = internalClass.getMethods();
 			String methodName;
-			for (Iterator mi = methodsList.iterator(); mi.hasNext();) {
-				internalMethod = (SootMethod) mi.next();
+			for (Iterator<SootMethod> mi = methodsList.iterator(); mi.hasNext();) {
+				internalMethod = mi.next();
+				System.out.println("***MethodSig: "+internalMethod.getSignature());
 				if (logger.isLoggable(Level.FINE)) 
 					Util.printMethodBody(internalMethod);
 				methodName = internalMethod.getName();

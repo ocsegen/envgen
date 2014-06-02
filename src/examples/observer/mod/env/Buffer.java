@@ -13,7 +13,7 @@ public class Buffer extends env.Vector {
   public void register(Watcher param0){
     // begin may se;
     if(Verify.randomBool()){
-      param0.registered=Abstraction.TOP_BOOL;
+      param0.registered=true;
     }
     // end may se;
   }
@@ -21,7 +21,7 @@ public class Buffer extends env.Vector {
   public void unregister(Watcher param0){
     // begin may se;
     if(Verify.randomBool()){
-      param0.registered=Abstraction.TOP_BOOL;
+      param0.registered=false;
     }
     // end may se;
   }

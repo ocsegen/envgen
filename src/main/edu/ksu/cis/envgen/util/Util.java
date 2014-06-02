@@ -18,8 +18,8 @@ import soot.*;
 
 public class Util {
 	
-	public static List getTokenList(String strList){
-		List result = new ArrayList();
+	public static List<String> getTokenList(String strList){
+		List<String> result = new ArrayList<String>();
 	
 		StringTokenizer tokenizer = new StringTokenizer(strList);
 		int length = tokenizer.countTokens();
@@ -63,15 +63,74 @@ public class Util {
 
 	}
 
+	
 	public static SootMethod getConstructor(SootClass sc) {
-		List methods = sc.getMethods();
+		List<SootMethod> methods = sc.getMethods();
 		SootMethod sm;
-		for (Iterator i = methods.iterator(); i.hasNext();) {
-			sm = (SootMethod) i.next();
+		for (Iterator<SootMethod> i = methods.iterator(); i.hasNext();) {
+			sm = i.next();
 			if (sm.getName().equals("<init>"))
 				return sm;
 		}
 		return null;
+	}
+	
+	/* find a public constructor with the least number of args */
+	//TODO: should preference be given to primitive type args? 
+	public static SootMethod getConstructorMin(SootClass sc) {
+		List<SootMethod> methods = sc.getMethods();
+		SootMethod sm = null;
+		SootMethod result = null;
+		int numArgs;
+		int resultNumArgs = 1000;
+		for (Iterator<SootMethod> i = methods.iterator(); i.hasNext();) {
+			sm = i.next();
+			if(!sm.isPublic())
+				continue;
+			if (sm.getName().equals("<init>")){
+				List<Type> types = sm.getParameterTypes();
+				numArgs = types.size();
+				if(numArgs < resultNumArgs){
+					resultNumArgs = numArgs;
+					result = sm;
+				}
+					
+			}
+				
+		}
+		return result;
+	}
+	
+	
+	/* find a public constructor with primitive args */
+	//TODO: should the preference be given to constructors that setup the most data?
+	public static SootMethod getConstructorPrimitiveArgs(SootClass sc) {
+		List<SootMethod> methods = sc.getMethods();
+		SootMethod sm = null;
+		Type type;
+		SootMethod result = null;
+		//int numArgs;
+		//int resultNumArgs = 1000;
+		for (Iterator<SootMethod> i = methods.iterator(); i.hasNext();) {
+			sm = i.next();
+			if(!sm.isPublic())
+				continue;
+			if (sm.getName().equals("<init>")){
+				List<Type> types = sm.getParameterTypes();
+				boolean allPrimitiveArgs = true;
+				for(Iterator<Type> ti = types.iterator(); ti.hasNext();){
+					type = ti.next();
+					if(type instanceof RefType ||
+					   type instanceof ArrayType)
+						allPrimitiveArgs = false;
+				}
+				if(allPrimitiveArgs)
+					return sm;
+					
+			}
+				
+		}
+		return result;
 	}
 	
 	public static void printMethodBody(SootMethod sm){

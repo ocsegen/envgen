@@ -25,9 +25,9 @@ import edu.ksu.cis.envgen.*;
 public abstract class AnalysisResults extends StubAssumptions {
 	public Logger logger = Logger.getLogger("edu.ksu.cis.envgen.analysis");
 
-	Map methodToSummarries = new HashMap();
+	Map<SootMethod, MethodSummary> methodToSummarries = new HashMap<SootMethod, MethodSummary>();
 
-	public Map getMethodSummaries(){
+	public Map<SootMethod, MethodSummary> getMethodSummaries(){
 		return methodToSummarries;
 	}
 	

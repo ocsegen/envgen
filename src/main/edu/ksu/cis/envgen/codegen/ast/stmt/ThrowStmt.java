@@ -22,6 +22,12 @@ public class ThrowStmt extends JavaStmt{
 	public ThrowStmt(JavaExpr expr){
 		this.expr = expr;
 	}
+	
+    public Object clone()
+    {
+        return new ThrowStmt(expr);
+        
+    }
 
 	public void printToFile(FileWriter file, int shift){
 		logger.warning("finish");

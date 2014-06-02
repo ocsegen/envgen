@@ -22,5 +22,5 @@ public abstract class AssumptionsCombiner {
 	
 	public abstract void setOptions(Properties properties);
 
-	public abstract Assumptions generalize(List assumptionsList);
+	public abstract Assumptions generalize(List<Assumptions> assumptionsList);
 }

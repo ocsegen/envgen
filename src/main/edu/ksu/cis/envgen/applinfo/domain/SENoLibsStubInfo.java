@@ -39,7 +39,7 @@ public class SENoLibsStubInfo extends ApplInfo {
 	
 	
 	public boolean isRelevantType(Type type){
-		logger.warning("finish implementation");
+		logger.fine("finish implementation");
 		return true;		
 	}
 	

@@ -1,8 +1,7 @@
 TODO
 
-Update to use generics
++ Update to SOOT 2.5
 
-Update to latest SOOT
++ Update to Java 1.7
 
-Update to latest Java 
-
+- Update to use generics

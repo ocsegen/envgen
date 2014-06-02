@@ -27,6 +27,12 @@ public class IfStmt extends JavaStmt {
 		this.second = elsepart;
 	}
 	
+    public Object clone()
+    {
+        return new IfStmt(cond, first, second);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 		for (int i = 0; i < shift; i++)
 			printf(file, "  ");

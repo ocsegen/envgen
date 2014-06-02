@@ -44,7 +44,7 @@ public class ConstValue extends SymLocValue {
 		//  return EnvPrinter.getTopNameVal(type);
 
 		if (type instanceof IntType)
-			return ("intVal: " + intValue);
+			return ("" + intValue);
 		else if (type instanceof BooleanType) {
 			if (intValue == 0)
 				return "false";

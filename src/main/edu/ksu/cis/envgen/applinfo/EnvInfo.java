@@ -30,7 +30,6 @@ public class EnvInfo extends ModuleInfo{
 	/** A list of concrete (analyzable) top-level environment methods */
 	//List methods = new ArrayList();
 
-
 	/** Used for insertion of environment classes */
 	
 	Logger logger = Logger.getLogger("edu.ksu.cis.envgen.applinfo");

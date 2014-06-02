@@ -14,13 +14,15 @@ package edu.ksu.cis.envgen.codegen.ast.stmt;
 import java.util.logging.Logger;
 import java.io.*;
 
+import soot.*;
+
 import edu.ksu.cis.envgen.codegen.*;
 
 /**
  * Representation of the Java statement.
  */
 
-public abstract class JavaStmt /* implements Unit or Stmt */
+public abstract class JavaStmt extends AbstractUnit 
 {
 	Logger logger = Logger.getLogger("envgen.codegen.javagrammar");
 
@@ -36,4 +38,9 @@ public abstract class JavaStmt /* implements Unit or Stmt */
 	//public abstract void printToFile(FileWriter file, int shift);
 	
 	public abstract void printToFile(FileWriter file, JavaPrinter printer, int shift);
+
+	//TODO: check dummy methods, needed for compatibility with soot.Unit
+	public boolean fallsThrough(){return true;} 
+	public boolean branches(){return true;}
+	public void toString( UnitPrinter up ){return;}
 }

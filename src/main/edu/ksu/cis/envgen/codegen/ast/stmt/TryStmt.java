@@ -22,6 +22,12 @@ public class TryStmt extends JavaStmt {
 		this.body = body;
 	}
 	
+    public Object clone()
+    {
+        return new TryStmt(body);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 
 		for (int i = 0; i < shift; i++)

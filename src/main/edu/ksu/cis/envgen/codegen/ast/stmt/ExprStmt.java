@@ -13,7 +13,11 @@ package edu.ksu.cis.envgen.codegen.ast.stmt;
 
 import java.io.FileWriter;
 
+import soot.jimple.Jimple;
+import soot.jimple.internal.JIfStmt;
+
 import edu.ksu.cis.envgen.codegen.*;
+import edu.ksu.cis.envgen.codegen.ast.JavaGr;
 import edu.ksu.cis.envgen.codegen.ast.expr.JavaExpr;
 
 public class ExprStmt extends JavaStmt {
@@ -23,6 +27,12 @@ public class ExprStmt extends JavaStmt {
 		this.expr = e;
 	}
 
+    public Object clone()
+    {
+        return new ExprStmt(expr);
+        
+    }
+    	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 
 		for (int i = 0; i < shift; i++)
@@ -35,4 +45,5 @@ public class ExprStmt extends JavaStmt {
 		if (shift < 0)
 			printf(file, " ");
 	}
+	   
 }

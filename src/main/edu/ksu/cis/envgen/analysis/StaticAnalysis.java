@@ -75,7 +75,7 @@ public abstract class StaticAnalysis{
 	}
 	*/
 	
-	public abstract AnalysisResults analyze(List markedMethods);
+	public abstract AnalysisResults analyze(List<SootMethod> markedMethods);
 	
 	public boolean getPreserveCallBacks(){
 		return preserveCallBacks;
@@ -126,7 +126,7 @@ public abstract class StaticAnalysis{
 			Type rootType = root.getRootType();
 
 			InvokeExpr ie = (InvokeExpr) unit.getInvokeExpr();
-			List args = ie.getArgs();
+			List<Value> args = ie.getArgs();
 
 			if (root instanceof RootThis  || ((root instanceof RootNewObject) && root.isInnerLoc())) {
 
@@ -156,7 +156,7 @@ public abstract class StaticAnalysis{
 				// generate a pair where argNum = set of values of paramNum
 				// map param = arg
 
-				Value arg = (Value) args.get(index);
+				Value arg = args.get(index);
 				// if this location is of our interest
 				mappings.addAll(getMappedArg(param, arg, aliasSet));
 			}
@@ -391,8 +391,8 @@ public abstract class StaticAnalysis{
 		//boolean top;
 		//Value value;
 
-		for (Iterator vi = values.iterator(); vi.hasNext();) {
-			temp = (SymLocValue) vi.next();
+		for (Iterator<SymLocValue> vi = values.iterator(); vi.hasNext();) {
+			temp = vi.next();
 			
 			logger.finer("Mapping individual value: " + temp);
 			// top = temp.getTop();
@@ -427,13 +427,13 @@ public abstract class StaticAnalysis{
 		logger.fine("getMappedLocs: mapping locs set: " + values);
 
 		MultiSet mappedValues = new MultiSet();
-		Iterator vi = values.iterator();
+		Iterator<SymLocValue> vi = values.iterator();
 		SymLocValue temp;
 		boolean top;
 		Value value;
 
 		while (vi.hasNext()) {
-			temp = (SymLocValue) vi.next();
+			temp = vi.next();
 			
 			logger.finer("mapping individual loc: " + temp);
 			// top = temp.getTop();
@@ -494,9 +494,9 @@ public abstract class StaticAnalysis{
 					logger.severe("getValues: no locations on the rhs");
 				
 				
-					SymLoc rhsLoc;
-					for (Iterator ri = rhsSet.iterator(); ri.hasNext();) {
-						val = (SymLoc) ri.next();
+					//SymLoc rhsLoc;
+					for (Iterator<SymLoc> ri = rhsSet.iterator(); ri.hasNext();) {
+						val = ri.next();
 						// val = new SymLocValue(rhsLoc);
 						result.add(val);
 					}

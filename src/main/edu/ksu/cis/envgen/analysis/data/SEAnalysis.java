@@ -68,26 +68,26 @@ public class SEAnalysis extends StaticAnalysis {
 	 * records a set of unit data side-effects.
 	 *
 	 */
-	public SEAnalysisResults analyze(List markedMethods) {
+	public SEAnalysisResults analyze(List<SootMethod> markedMethods) {
 
 		 PTAnalysis pointsToAnalysis =
 			new PTAnalysis(applInfo);
 
-		HashSet visited = new HashSet();
+		HashSet<SootMethod> visited = new HashSet<SootMethod>();
 
-		for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-			pointsToAnalysis.analyzeAliases((SootMethod) mi.next(), visited);
+		for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+			pointsToAnalysis.analyzeAliases(mi.next(), visited);
 
 		PTAnalysisResults ptAnalysisResults = pointsToAnalysis.getPTAnalysisResults();
 		seAnalysisResults = new SEAnalysisResults(ptAnalysisResults);
 
-		for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-			analyzeSideEffects((SootMethod) mi.next(), visited);
+		for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+			analyzeSideEffects(mi.next(), visited);
 
 		if (mustSE) {
 
-			for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-				analyzeMustSideEffects((SootMethod) mi.next(), visited);
+			for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+				analyzeMustSideEffects(mi.next(), visited);
 		}
 
 		return seAnalysisResults;
@@ -99,7 +99,7 @@ public class SEAnalysis extends StaticAnalysis {
 	 */
 	public void analyzeSideEffects(
 		SootMethod externalMethod,
-		HashSet visited) {
+		HashSet<SootMethod> visited) {
 		//we enter this method only if there is no mapping from
 		//external method to its side-effects summary
 
@@ -107,7 +107,7 @@ public class SEAnalysis extends StaticAnalysis {
 			//has been visited but no summary
 			//this is a cycle in the graph
 			//assume the most general infor for the called method
-			logger.fine("Cycle with method " + externalMethod);
+			logger.warning("Cycle with method " + externalMethod);
 			//create a mapping from called to a summary table
 			//that changes every possible location
 
@@ -188,7 +188,7 @@ public class SEAnalysis extends StaticAnalysis {
 	*/
 	public void analyzeMustSideEffects(
 		SootMethod externalMethod,
-		HashSet visited) {
+		HashSet<SootMethod> visited) {
 
 		//we enter this method only if there is no mapping from
 		//external method to its side-effects summary
@@ -296,10 +296,10 @@ public class SEAnalysis extends StaticAnalysis {
 			MultiSet returnSummary =
 				seAnalysisResults.getReturnSideEffectsOf(
 					externalMethod.getSignature());
-			Iterator ri = returnSummary.iterator();
+			Iterator<DataFlowSet> ri = returnSummary.iterator();
 			DataFlowSet temp;
 			while (ri.hasNext()) {
-				temp = (DataFlowSet) ri.next();
+				temp = ri.next();
 				temp.difference(mustSummary, temp);
 			}
 		}
@@ -395,8 +395,8 @@ public class SEAnalysis extends StaticAnalysis {
 
 		DataFlowSet temp = null;
 		int i = 0;
-		for (Iterator cfgi = cfg.iterator(); cfgi.hasNext();) {
-			Unit s = (Unit) cfgi.next();
+		for (Iterator<Unit> cfgi = cfg.iterator(); cfgi.hasNext();) {
+			Unit s = cfgi.next();
 			if (s instanceof ReturnStmt || s instanceof ReturnVoidStmt) {
 				temp = (DataFlowSet) modifications.getFlowAfter((Unit) s);
 
@@ -423,8 +423,8 @@ public class SEAnalysis extends StaticAnalysis {
 		SEAnalysisTF modifications) {
 		MultiSet summary = new MultiSet();
 		DataFlowSet temp = null;
-		for (Iterator cfgi = cfg.iterator(); cfgi.hasNext();) {
-			Unit s = (Unit) cfgi.next();
+		for (Iterator<Unit> cfgi = cfg.iterator(); cfgi.hasNext();) {
+			Unit s = cfgi.next();
 			if (s instanceof ReturnStmt || s instanceof ReturnVoidStmt) {
 				temp = (DataFlowSet) modifications.getFlowAfter((Unit) s);
 

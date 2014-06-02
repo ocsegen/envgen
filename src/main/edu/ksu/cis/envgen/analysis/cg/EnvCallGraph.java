@@ -66,12 +66,12 @@ public abstract class EnvCallGraph /* extends InvokeGraph */{
 	
 	public abstract List getTargetsOf(SootMethod sm);
 
-	public abstract  Collection getTargetsOf(Stmt site, SootMethod sm);
+	public abstract  Collection<SootMethod> getTargetsOf(Stmt site, SootMethod sm);
 	
-	public abstract Collection getTargetsOf(Stmt site, InvokeExpr expr,
+	public abstract Collection<SootMethod> getTargetsOf(Stmt site, InvokeExpr expr,
 			Type receiverType, SootMethod sm);
 	
-	public abstract  List getTargetsOf(Stmt site);
+	public abstract  List<SootMethod> getTargetsOf(Stmt site);
 	
 	public abstract List getSitesOf(SootMethod sm); 
 	
@@ -181,26 +181,36 @@ public abstract class EnvCallGraph /* extends InvokeGraph */{
 	}
 	*/
 	
-	public List getAllEntryMethods(){
-		List result = new ArrayList();
+	public List<SootMethod> getAllEntryMethods(){
+		List<SootMethod> result = new ArrayList<SootMethod>();
 		SootClass internalClass = null;
 		SootMethod internalMethod = null;
 		
-		for (Iterator it = unit.getClasses().iterator(); it.hasNext();) {
-			internalClass = (SootClass) it.next();
-			List methodList = internalClass.getMethods();
-			result.addAll(methodList);
+		for (Iterator<SootClass> it = unit.getClasses().iterator(); it.hasNext();) {
+			internalClass = it.next();
+			List<SootMethod> methodList = internalClass.getMethods();
+			
+			for(Iterator<SootMethod> im = methodList.iterator(); im.hasNext();){
+				internalMethod = im.next();
+				//we do not analyze entry methods that are abstract, native or phantom
+				//TODO: find implementations of abstract methods?
+				if(internalMethod.isConcrete()){
+					result.add(internalMethod);
+				}
+			}
+			
+			//result.addAll(methodList);
 		}
 		
 		return result;
 		
 	}
 
-	public List getMainEntryMethods(List methods) {
-		List result = new ArrayList();
+	public List<SootMethod> getMainEntryMethods(List<SootMethod> methods) {
+		List<SootMethod> result = new ArrayList<SootMethod>();
 		SootMethod temp;
-		for (Iterator it = methods.iterator(); it.hasNext();) {
-			temp = (SootMethod) it.next();
+		for (Iterator<SootMethod> it = methods.iterator(); it.hasNext();) {
+			temp = it.next();
 			if (temp.getName().equals("main"))
 				result.add(temp);
 		}
@@ -208,6 +218,10 @@ public abstract class EnvCallGraph /* extends InvokeGraph */{
 			logger.severe("getEntryMethods: no entry methods");
 		logger.info("entry methods: " + result);
 		return result;
+	}
+	
+	public CallGraph getCallGraph(){
+		return callGraph;
 	}
 	
 	public List getEnvMethods() {
@@ -259,6 +273,10 @@ public abstract class EnvCallGraph /* extends InvokeGraph */{
 		 * if(l.isLibraryClass()) System.out.println(l+" is library");
 		 *  }
 		 */
+	}
+	
+	public String toString(){
+		return callGraph.toString();
 	}
 
 }

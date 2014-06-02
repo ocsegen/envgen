@@ -25,6 +25,12 @@ public class CatchStmt extends JavaStmt{
 		this.body = body;
 	}
 	
+    public Object clone()
+    {
+        return new CatchStmt(expt, body);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift){
 		for (int i = 0; i < shift; i++)
 			printf(file, "  ");

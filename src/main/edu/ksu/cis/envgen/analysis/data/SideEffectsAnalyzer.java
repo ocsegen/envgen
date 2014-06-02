@@ -80,7 +80,7 @@ public class SideEffectsAnalyzer extends AssumptionsAcquirer {
 		this.unit = info.getUnit();
 		this.env = info.getEnv();
 		
-		List markedMethods = null;
+		List<SootMethod> markedMethods = null;
 		if(unitAnalysis)
 			markedMethods = unit.getMethods();
 		else 
@@ -92,10 +92,10 @@ public class SideEffectsAnalyzer extends AssumptionsAcquirer {
 				new PTAnalysis(applInfo);
 		 pta.setOptions(properties);
 
-		HashSet visited = new HashSet();
+		HashSet<SootMethod> visited = new HashSet<SootMethod>();
 
-		for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-			pta.analyzeAliases((SootMethod) mi.next(), visited);
+		for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+			pta.analyzeAliases(mi.next(), visited);
 
 		PTAnalysisResults ptAnalysisResults = pta.getPTAnalysisResults();
 			
@@ -104,13 +104,13 @@ public class SideEffectsAnalyzer extends AssumptionsAcquirer {
 		//set analysis results
 		//se.setAnalysisResults(analysisResults);
 
-		for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-			se.analyzeSideEffects((SootMethod) mi.next(), visited);
+		for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+			se.analyzeSideEffects(mi.next(), visited);
 
 		if (mustSE) {
 
-			for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-				se.analyzeMustSideEffects((SootMethod) mi.next(), visited);
+			for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+				se.analyzeMustSideEffects(mi.next(), visited);
 		}
 		AnalysisResults seAnalysisResults = se.getSEAnalysisResults();
 		if (printToFile)

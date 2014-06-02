@@ -153,8 +153,8 @@ public class SymLocTop extends SymLoc  {
 
 		String modifiedAccessorStr = "";
 		if (modifiedAccessor != null)
-			modifiedAccessorStr =
-				"/mod: " + modifiedAccessor.toString();
+			//modifiedAccessorStr ="/mod: " + modifiedAccessor.toString();
+		    modifiedAccessorStr = modifiedAccessor.toString();
 
 
 		String baseTypeStr = type.toString();

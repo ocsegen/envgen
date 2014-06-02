@@ -65,11 +65,11 @@ public class PTAnalysis extends StaticAnalysis {
 	 * records a set of unit data side-effects.
 	 *
 	 */
-	public AnalysisResults analyze(List markedMethods) {
+	public AnalysisResults analyze(List<SootMethod> markedMethods) {
 
-		HashSet visited = new HashSet();
-		for (Iterator mi = markedMethods.iterator(); mi.hasNext();)
-			analyzeAliases((SootMethod) mi.next(), visited);
+		HashSet<SootMethod> visited = new HashSet<SootMethod>();
+		for (Iterator<SootMethod> mi = markedMethods.iterator(); mi.hasNext();)
+			analyzeAliases(mi.next(), visited);
 		
 		return ptAnalysisResults;
 	}
@@ -78,7 +78,7 @@ public class PTAnalysis extends StaticAnalysis {
 	 * Interprocedural, flow-sensitive, parameterized alias analysis.
 	 *
 	 */
-	public void analyzeAliases(SootMethod externalMethod, HashSet visited) {
+	public void analyzeAliases(SootMethod externalMethod, HashSet<SootMethod> visited) {
 		
 		String methodSignature = externalMethod.getSignature();
 		

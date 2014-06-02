@@ -82,13 +82,15 @@ public class EnvGenerator {
 		
 
 		//TODO: document that genCode modifies env
-		//TODO: make code gen optional
-		cg.genCode(info, assumptions);
+		//code gen optional
+		if(cg!=null){
+			cg.genCode(info, assumptions);
 		
 		
-		EnvPrinter printer = configuration.getEnvPrinter();
+			EnvPrinter printer = configuration.getEnvPrinter();
 		
-		printer.printfEnv(info);
+			printer.printfEnv(info);
+		}
 		
 		long finish = System.currentTimeMillis();
 		long execTime = finish - start;

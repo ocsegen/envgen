@@ -27,6 +27,12 @@ public class VDeclStmt extends JavaStmt{
 		
 	}
 	
+    public Object clone()
+    {
+        return new VDeclStmt(type, name);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift){
 		type.printToFile(file, printer, 0);
 		printf(file, " ");

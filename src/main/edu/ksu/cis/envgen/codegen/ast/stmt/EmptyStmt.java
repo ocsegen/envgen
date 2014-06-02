@@ -19,6 +19,13 @@ public class EmptyStmt extends JavaStmt{
 	public EmptyStmt(){
 		
 	}
+	
+    public Object clone()
+    {
+        return new EmptyStmt();
+        
+    }
+	
 	public void printToFile(FileWriter file, int shift) {
 		//ignore
 	}

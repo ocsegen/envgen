@@ -11,6 +11,8 @@
  */ 
 package edu.ksu.cis.envgen;
 
+import java.util.HashMap;
+
 import soot.*;
 
 import edu.ksu.cis.envgen.analysis.cg.EnvCallGraph;
@@ -18,10 +20,13 @@ import edu.ksu.cis.envgen.applinfo.EnvHierarchy;
 import edu.ksu.cis.envgen.applinfo.ModuleInfo;
 
 public abstract class ApplInfo {
-	public ModuleInfo unit;
-	public ModuleInfo env;
-	public EnvCallGraph callGraph;
-	public EnvHierarchy envHierarchy;
+	protected ModuleInfo unit;
+	protected ModuleInfo env;
+	protected EnvCallGraph callGraph;
+	protected EnvHierarchy envHierarchy;
+	
+	/** Additional relevant info */
+	protected HashMap<String, SootMethod> relevantInfo;
 	
 	public ApplInfo(){}
 	
@@ -69,6 +74,14 @@ public abstract class ApplInfo {
 	}
 	public EnvHierarchy getEnvHierarchy(){
 		return envHierarchy;
+	}
+	
+	public void setRelevantInfo(HashMap<String, SootMethod> set){
+		relevantInfo = set;
+	}
+	
+	public HashMap<String, SootMethod> getRelevantInfo(){
+		return relevantInfo;
 	}
 	
 	//used to track objects by type in points-to analysis

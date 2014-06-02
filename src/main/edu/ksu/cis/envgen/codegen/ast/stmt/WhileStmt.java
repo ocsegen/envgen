@@ -27,6 +27,12 @@ public class WhileStmt extends JavaStmt{
 		this.body = body;
 	}
 
+    public Object clone()
+    {
+        return new WhileStmt(cond, body);
+        
+    }
+	
 	public void printToFile(FileWriter file, JavaPrinter printer, int shift) {
 		
 		for (int i = 0; i < shift; i++)

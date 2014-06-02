@@ -32,14 +32,14 @@ public class DataFlowSet implements FlowSet {
 	 * requires <code>obj</code> to be of type ValueSetPair.
 	 */
 
-	HashMap map = new HashMap();
+	HashMap<Value, MultiSet> map = new HashMap<Value, MultiSet>();
 	Logger logger = Logger.getLogger("envgen.analysis.stat");
 
 	public DataFlowSet() {
 
 	}
 
-	public DataFlowSet(HashMap map) {
+	public DataFlowSet(HashMap<Value, MultiSet> map) {
 		this.map = map;
 	}
 
@@ -113,14 +113,13 @@ public class DataFlowSet implements FlowSet {
 		if (obj == null)
 			logger.severe("DataFlowSet, containsKey: null object");
 
-		Set keys = this.keySet();
+		Set<Value> keys = this.keySet();
 
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			temp = (Value) it.next();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			temp = it.next();
 
-			if (/* temp instanceof Value && */ obj instanceof Value) {
-				if (((Value) temp)
-					.toString()
+			if (obj instanceof Value) {
+				if (temp.toString()
 					.equals((((Value) obj).toString())))
 					return true;
 			}
@@ -139,13 +138,12 @@ public class DataFlowSet implements FlowSet {
 		if (obj == null)
 			logger.severe("DataFlowSet, getKey: null object");
 
-		Set keys = this.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			temp = (Value) it.next();
+		Set<Value> keys = this.keySet();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			temp = it.next();
 
-			if (/* temp instanceof Value && */ obj instanceof Value) {
-				if (((Value) temp)
-					.toString()
+			if (obj instanceof Value) {
+				if (temp.toString()
 					.equals((((Value) obj).toString())))
 					return temp;
 			}
@@ -291,10 +289,10 @@ public class DataFlowSet implements FlowSet {
 					+ "\ndest: "
 					+ dest);
 
-		Set keys = ((DataFlowSet) this).keySet();
+		Set<Value> keys = ((DataFlowSet) this).keySet();
 
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			temp = (Value) it.next();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			temp = it.next();
 
 			if (((DataFlowSet) other).containsKey(temp)) {
 				key = ((DataFlowSet) other).getKey(temp);
@@ -389,10 +387,10 @@ public class DataFlowSet implements FlowSet {
 
 		logger.fine("\nDataFlowSet union, \n" + this +"\n\n union \n\n" + other);
 
-		Set keys = ((DataFlowSet) other).keySet();
+		Set<Value> keys = ((DataFlowSet) other).keySet();
 
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			temp = (Value) it.next();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			temp = it.next();
 
 			if (!((DataFlowSet) dest).containsKey(temp)) {
 				// need to add temp into the destination set
@@ -439,13 +437,13 @@ public class DataFlowSet implements FlowSet {
 	public boolean equals(Object second) {
 		if (!(second instanceof DataFlowSet))
 			logger.severe("DataFlowSet, equals, wrong type parameter!!!!");
-		Set f = this.keySet();
+		Set<Value> f = this.keySet();
 		logger.fine(
 				"DATA FLOW SET :" + this +" EQUALS WITH SECOND?: " + second);
-		Set s = ((DataFlowSet) second).keySet();
+		Set<Value> s = ((DataFlowSet) second).keySet();
 
 		if (f.size() == s.size()) {
-			Iterator fi = f.iterator();
+			Iterator<Value> fi = f.iterator();
 			Value fVal;
 			Value fKey;
 			Value sKey;
@@ -453,7 +451,7 @@ public class DataFlowSet implements FlowSet {
 			MultiSet sMultiSet;
 			MultiSet fMultiSet;
 			while (fi.hasNext()) {
-				fVal = (Value) fi.next();
+				fVal = fi.next();
 				if (((DataFlowSet) second).containsKey(fVal)) {
 					fKey = this.getKey(fVal);
 					sKey = ((DataFlowSet) second).getKey(fVal);
@@ -489,7 +487,7 @@ public class DataFlowSet implements FlowSet {
 	/*-------------------------------------------------------------*/
 
 	public Object put(Object key, Object value) {
-		return map.put(key, value);
+		return map.put((Value)key, (MultiSet)value);
 	}
 
 	public Object get(Object key) {
@@ -500,7 +498,7 @@ public class DataFlowSet implements FlowSet {
 		return map.size();
 	}
 
-	public Set keySet() {
+	public Set<Value> keySet() {
 		return map.keySet();
 	}
 	public boolean isEmpty() {
@@ -522,11 +520,11 @@ public class DataFlowSet implements FlowSet {
 
 		Value key = null;
 		MultiSet values = null;
-		HashMap resultMap = new HashMap();
+		HashMap<Value, MultiSet> resultMap = new HashMap<Value,MultiSet>();
 
-		Set keys = this.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			key = (Value) it.next();
+		Set<Value> keys = this.keySet();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			key = it.next();
 			values = (MultiSet) this.get(key);
 			resultMap.put(key, values);
 		}
