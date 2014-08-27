@@ -81,9 +81,10 @@ public class SideEffectsAnalyzer extends AssumptionsAcquirer {
 		this.env = info.getEnv();
 		
 		List<SootMethod> markedMethods = null;
-		if(unitAnalysis)
-			markedMethods = unit.getMethods();
-		else 
+		//TODO: synch with how env methods are filled
+		//if(unitAnalysis)
+		//	markedMethods = unit.getMethods();
+		//else 
 			markedMethods = env.getMethods();
 		
 		logger.info("\nMethods under analysis: \n" + markedMethods);

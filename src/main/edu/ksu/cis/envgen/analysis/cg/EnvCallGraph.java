@@ -18,6 +18,7 @@ import soot.*;
 import soot.util.*;
 import soot.jimple.*;
 import soot.jimple.toolkits.callgraph.CallGraph;
+import soot.jimple.toolkits.callgraph.Edge;
 
 import edu.ksu.cis.envgen.*;
 import edu.ksu.cis.envgen.applinfo.*;
@@ -74,6 +75,24 @@ public abstract class EnvCallGraph /* extends InvokeGraph */{
 	public abstract  List<SootMethod> getTargetsOf(Stmt site);
 	
 	public abstract List getSitesOf(SootMethod sm); 
+	
+	// TODO: implement transitive closure
+	public List<SootMethod> getCallersOf(SootMethod sm) {
+
+		List<SootMethod> result = new ArrayList<SootMethod>();
+		Iterator<Edge> callers = callGraph.edgesInto(sm);
+
+		SootMethod caller;
+		Edge edge;
+		while (callers.hasNext()) {
+			edge = callers.next();
+			caller = edge.src();
+			System.out.println("caller of: " + sm + "   :   " + caller);
+			result.add(caller);
+		}
+
+		return result;
+	}
 	
 
 	/**
