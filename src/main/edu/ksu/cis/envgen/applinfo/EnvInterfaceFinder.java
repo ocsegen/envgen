@@ -13,7 +13,6 @@ package edu.ksu.cis.envgen.applinfo;
 
 import java.util.*;
 import java.util.logging.*;
-import java.io.*;
 
 import soot.*;
 import soot.jimple.*;
@@ -33,16 +32,16 @@ import edu.ksu.cis.envgen.util.Util;
  */
 public class EnvInterfaceFinder extends InterfaceFinder {
 	
-	ApplInfo applInfo;
+//	ApplInfo applInfo;
 	
-	/** Keeps track of unit classes. */
-	ModuleInfo unit;
-
-	/** 
-	 * Keeps track of environment components, 
-	 * including only those that get called inside the unit. 
-	 */
-	ModuleInfo env;
+//	/** Keeps track of unit classes. */
+//	ModuleInfo unit;
+//
+//	/** 
+//	 * Keeps track of environment components, 
+//	 * including only those that get called inside the unit. 
+//	 */
+//	ModuleInfo env;
 	
 	EnvCallGraph callGraph;
 	
@@ -52,7 +51,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	/** Hierarchy for modeled classes */
 	EnvHierarchy envHierarchy;
 
-	protected Properties properties;
+//	protected Properties properties;
 	
 	//TODO: should be moved to EnvCallGraph
 	boolean unitAnalysis = false; 
@@ -60,7 +59,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	//TODO: replace this by extensible architecture
 	String callGraphType = "cha";
 
-	List ignoreModelingList;
+	List<String> ignoreModelingList;
 
 	Logger logger = Logger.getLogger("envgen.applinfo");
 	
@@ -168,6 +167,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		//ApplInfo info = new ApplInfo(unit, env, domainInfo, callGraph, envHierarchy);
 		applInfo.setEnvCallGraph(callGraph);
 		applInfo.setEnvHierarchy(envHierarchy);
+		applInfo.setIgnoredInfo(ignoreModelingList);
+		
 		return applInfo;
 	}
 	/** 
@@ -201,7 +202,8 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 					env.addMethodToClass(markedClass, internalMethod);
 				}
 
-			} else {
+			} 
+			//else {
 
 				// whatever this class extends or implements needs to be in the environment
 				//put the parent of this class in the environment
@@ -213,7 +215,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 				envCheckFields(internalClass);
 
 				envCheckMethods(internalClass);
-			}
+			//}
 		}
 		//System.out.println("----------discovered environment components: ");
 		//EnvPrinter.printTable(envTable);
@@ -290,6 +292,9 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 
 		//check the implementation of the method
 
+		if(unitAnalysis)
+			return;
+		
 		if (internalMethod.isPhantom()
 			|| internalMethod.isNative()
 			|| internalMethod.isAbstract()) {
@@ -582,7 +587,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 
 		
 		//ignore generation of stubs for java.lang package
-		if (ignoreModeling(typeName))
+		if (!applInfo.isRelevantPackage(typeName))
 			return false;
 
 		//filter out inner and anonymous classes 		
@@ -838,11 +843,11 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		String modelName, realName;
 		
 		//a trick to avoid concurrent modification exception
-		List classNames = new ArrayList(env.getClassNames());
+		List<String> classNames = new ArrayList<String>(env.getClassNames());
 		
-		for (Iterator it = classNames.iterator(); it.hasNext();) {
+		for (Iterator<String> it = classNames.iterator(); it.hasNext();) {
 			
-			modelName = (String)it.next();
+			modelName = it.next();
 			
 			markedClass = env.getClass(modelName);
 			
@@ -1003,13 +1008,14 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 	}
 	
 	
-	protected boolean ignoreModeling(String type){
-		if(ignoreModelingList == null)
-			return false;
-		if(ignoreModelingList.contains(type))
-			return true;
-		return false;	
-	}
+//	protected boolean ignoreModeling(String type){
+//		if(ignoreModelingList == null)
+//			return false;
+//		
+//		if(ignoreModelingList.contains(type))
+//			return true;
+//		return false;	
+//	}
 	
 	protected boolean ignoreReference(String type){
 		

@@ -68,7 +68,7 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 
 	boolean preserveCallBacks;
 	
-	Logger logger = Logger.getLogger("envgen.analysis.stat");
+	Logger logger = Logger.getLogger("envgen.analysis.pta");
 
 	protected Object newInitialFlow() {
 		return initSet.clone();
@@ -350,16 +350,19 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 		MultiSet set = new MultiSet(); // set holding symbolic locations
 		SymLoc symLoc = null;
 
-		logger.finer("ArrayRef on rhs");
+		logger.fine("ArrayRef on rhs: "+rhs);
 
 		Value base = ((ArrayRef) rhs).getBase();
 		Value index = ((ArrayRef) rhs).getIndex();
 		Type baseType = base.getType();
 		Type elemType = ((ArrayType) baseType).baseType;
+		
+		logger.fine("Base type: "+baseType);
+		logger.fine("Elem type: "+elemType);
 
 		if (analysis.processRefType(elemType)) {
 			if (in.containsKey(base)) {
-				logger.finer("\nPointsTo Analysis base: " + base
+				logger.fine("\nPointsTo Analysis base: " + base
 							+ " in the table");
 				// pull out all symbolic locations for this alias
 
@@ -379,6 +382,9 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 				logger.finer("AliasAnalysis, getLocsOfArrayRef: dummy pass");
 			}
 		} else {
+			//TODO: do we need to record the env loc?
+			//TODO: elemType or baseType?
+			//symLoc = new SymLocTop(SymLocTop.ENVIRONMENT_LOC, baseType);
 			symLoc = new SymLocTop(SymLocTop.ENVIRONMENT_LOC, elemType);
 			set.add(symLoc);
 		}
@@ -421,7 +427,7 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 
 		// if(unitTable.containsKey(refType.toString()))
 		if (analysis.processRefType(refType)) {
-			logger.finer("Unit type creation cite");
+			logger.fine("Creation cite for unit type: "+refType);
 
 			RootNewObject root = new RootNewObject(rhs, refType);
 			root.setAllocationSite(unit);
@@ -462,12 +468,14 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 		MultiSet set = new MultiSet(); // set holding symbolic locations
 		SymLoc symLoc; // symbolic location
 
-		logger.finer("Array creation cite");
+		logger.fine("Array creation cite: "+unit);
+		
 		Type baseType = ((NewArrayExpr) rhs).getType();
-		logger.finer("NewArrayRef type: " + baseType);
 		Type elemType = ((NewArrayExpr) rhs).getBaseType();
-
-		logger.finer("element type: " + elemType);
+		
+		logger.fine("NewArrayRef type: " + baseType);
+		logger.fine("Element type: " + elemType);
+		
 		// if(unitTable.containsKey(elemType.toString()))
 		if (analysis.processRefType(elemType)) {
 			logger.finer("Unit type creation cite");
@@ -514,9 +522,9 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 		MultiSet set = new MultiSet(); // set holding symbolic locations
 		SymLoc symLoc = null; // symbolic location
 
-		logger.finer("Array creation cite");
+		logger.fine("Array creation cite");
 		Type baseType = ((NewMultiArrayExpr) rhs).getType();
-		logger.finer("NewMultiArrayRef type: " + baseType);
+		logger.fine("NewMultiArrayRef type: " + baseType);
 
 		ArrayType arrayType = ((NewMultiArrayExpr) rhs).getBaseType();
 

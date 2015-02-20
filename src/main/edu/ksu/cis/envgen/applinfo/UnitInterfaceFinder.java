@@ -25,16 +25,16 @@ import edu.ksu.cis.envgen.util.*;
  * 
  */
 public class UnitInterfaceFinder extends InterfaceFinder {
-	/** Table of unit (internal) classes. */
-	ModuleInfo unit;
-
-	/**
-	 * Table of environment components, in the case of the driver, components
-	 * that make a driver.
-	 */
-	ModuleInfo env;
-
-	ApplInfo applInfo;
+//	/** Table of unit (internal) classes. */
+//	ModuleInfo unit;
+//
+//	/**
+//	 * Table of environment components, in the case of the driver, components
+//	 * that make a driver.
+//	 */
+//	ModuleInfo env;
+//
+//	ApplInfo applInfo;
 
 	Logger logger = Logger.getLogger("envgen.applinfo");
 

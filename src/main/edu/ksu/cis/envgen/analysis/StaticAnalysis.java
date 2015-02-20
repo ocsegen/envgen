@@ -123,7 +123,8 @@ public abstract class StaticAnalysis{
 			Root root = ((SymLocPath)param).getRoot();
 			
 			//System.out.println("param location: " + param + ", with root: "+ root);
-			Type rootType = root.getRootType();
+			//TODO: check if root == null?
+			//Type rootType = root.getRootType();
 
 			InvokeExpr ie = (InvokeExpr) unit.getInvokeExpr();
 			List<Value> args = ie.getArgs();
@@ -205,9 +206,9 @@ public abstract class StaticAnalysis{
 			MultiSet set = (MultiSet) aliasSet.get(arg);
 
 			logger.finer("Alias set for base: " + set);
-			for (Iterator is = set.iterator(); is.hasNext();) {
+			for (Iterator<SymLoc> is = set.iterator(); is.hasNext();) {
 				// This should always be a symbolic location
-				SymLoc temp = (SymLoc) is.next();
+				SymLoc temp = is.next();
 
 				// temp is the location arg points to
 
@@ -414,7 +415,7 @@ public abstract class StaticAnalysis{
 		}
 		
 		if(mappedValues.isEmpty())
-			logger.severe("Mapped Values empty");
+			logger.severe("Mapped Values empty for stmt: "+ unit);
 		
 		logger.finer("mapped set: " + mappedValues);
 
@@ -684,10 +685,12 @@ public abstract class StaticAnalysis{
 				return true;
 
 		}
-
+		//TODO: revisit
 		if (type instanceof PrimType)
-			return true;
-
+		return true;
+        //if(type instanceof PrimType)
+        // 	return applInfo.isRelevantType(type);
+		
 		return false;
 	}
 	

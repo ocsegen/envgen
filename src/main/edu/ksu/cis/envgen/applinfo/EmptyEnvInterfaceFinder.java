@@ -37,17 +37,17 @@ import edu.ksu.cis.envgen.util.Util;
  */
 public class EmptyEnvInterfaceFinder extends InterfaceFinder {
 	
-	ApplInfo applInfo;
-	
-	/** Keeps track of unit classes. */
-	ModuleInfo unit;
-
-	/** 
-	 * Keeps track of environment components, 
-	 * including only those that get called inside the unit. 
-	 */
-	ModuleInfo env;
-	
+//	ApplInfo applInfo;
+//	
+//	/** Keeps track of unit classes. */
+//	ModuleInfo unit;
+//
+//	/** 
+//	 * Keeps track of environment components, 
+//	 * including only those that get called inside the unit. 
+//	 */
+//	ModuleInfo env;
+//	
 	
 	EnvCallGraph callGraph;
 	
@@ -57,7 +57,7 @@ public class EmptyEnvInterfaceFinder extends InterfaceFinder {
 	/** Hierarchy for modeled classes */
 	EnvHierarchy envHierarchy;
 
-	protected Properties properties;
+//	protected Properties properties;
 	
 	//TODO: should be moved to EnvCallGraph
 	boolean unitAnalysis = false; 
@@ -192,8 +192,8 @@ public class EmptyEnvInterfaceFinder extends InterfaceFinder {
 		//all statements with external references
 		//put all external classes into envTable
 
-		for (Iterator it = unit.getClasses().iterator(); it.hasNext();) {
-			internalClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = unit.getClasses().iterator(); it.hasNext();) {
+			internalClass = it.next();
 			String className = internalClass.getName();
 			logger.info("Unit class: " + className);
 			

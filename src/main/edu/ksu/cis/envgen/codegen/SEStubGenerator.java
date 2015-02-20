@@ -58,6 +58,8 @@ public class SEStubGenerator extends JavaStubGenerator{
 	public void setOptions(Properties properties){
 		//TODO: recheck/finish options
 		
+		super.setOptions(properties);
+		
 		String mustAnalysisStr = properties.getProperty("mustAnalysis");
 		if(mustAnalysisStr != null)
 			mustSE = Boolean.valueOf(mustAnalysisStr);
@@ -90,7 +92,7 @@ public class SEStubGenerator extends JavaStubGenerator{
 		String methodSignature = "<" + signature.substring(2);
 		
 		
-		logger.info("Create stub body for method recovered signature: "
+		logger.fine("Create stub body for method recovered signature: "
 					+ methodSignature);
 		Type returnType = markedMethod.getReturnType();
 
@@ -218,7 +220,7 @@ public class SEStubGenerator extends JavaStubGenerator{
 	 */
 	public void buildCallBackStmts(SootMethod markedMethod, MultiSet callBacks, Chain units) {
 		
-		logger.info("callBacks for: "+markedMethod +"\n"+ callBacks);
+		logger.fine("callBacks for: "+markedMethod +"\n"+ callBacks);
 		
 		if(callBacks == null)
 			return;
@@ -375,12 +377,12 @@ public class SEStubGenerator extends JavaStubGenerator{
 
 		if (may){
 			analysisType = "may se";
-			logger.info("may sideEffectsSummary: "+"\n" + sideEffectsSummary);
+			logger.fine("may sideEffectsSummary: "+"\n" + sideEffectsSummary);
 
 		}
 		else{
 			analysisType = "must se";
-			logger.info("must sideEffectsSummary: "+"\n" + sideEffectsSummary);
+			logger.fine("must sideEffectsSummary: "+"\n" + sideEffectsSummary);
 
 		}
 

@@ -18,9 +18,7 @@ import java.util.*;
  * Combines environment assumptions that may come from different sources. 
  * 
  */
-public abstract class AssumptionsCombiner {
+public abstract class AssumptionsCombiner extends EnvGenModule {
 	
-	public abstract void setOptions(Properties properties);
-
 	public abstract Assumptions generalize(List<Assumptions> assumptionsList);
 }

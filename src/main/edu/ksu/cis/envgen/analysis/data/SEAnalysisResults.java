@@ -33,12 +33,13 @@ public class SEAnalysisResults extends AnalysisResults{
 	/** Mapping between method signatures and side-effects info.
 	 *  Used to pull out info on a method based on its signature 
 	 * rather than method's object, that might be different in other points of the program. */
-	Map methodToSideEffects = new HashMap();
+	Map<String, DataFlowSet> methodToSideEffects = new HashMap<String, DataFlowSet>();
 
-	Map methodToReturnSideEffects = new HashMap();
-
-	Map methodToMustSideEffects = new HashMap();
+	Map<String, DataFlowSet> methodToMustSideEffects = new HashMap<String, DataFlowSet>();
 	
+	Map<String, MultiSet> methodToReturnSideEffects = new HashMap<String, MultiSet>();
+
+
 
 	public SEAnalysisResults(PTAnalysisResults ptAnalysisResults){
 		this.ptAnalysisResults = ptAnalysisResults;
@@ -48,11 +49,11 @@ public class SEAnalysisResults extends AnalysisResults{
 	/*          To get tables                        */
 	/*-----------------------------------------------*/
 	
-	public Map getMethodToSideEffects() {
+	public Map<String, DataFlowSet> getMethodToSideEffects() {
 		return methodToSideEffects;
 	}
 
-	public Map getMethodToMustSideEffects() {
+	public Map<String, DataFlowSet> getMethodToMustSideEffects() {
 		return methodToMustSideEffects;
 	}
 
@@ -101,21 +102,21 @@ public class SEAnalysisResults extends AnalysisResults{
 
 
 	public void putSideEffects(String sm, DataFlowSet summary) {
-		if (methodToSideEffects == null)
-			methodToSideEffects = new HashMap();
+		//if (methodToSideEffects == null)
+		//	methodToSideEffects = new HashMap();
 		methodToSideEffects.put(sm, summary);
 
 	}
 
 	public void putMustSideEffects(String sm, DataFlowSet summary) {
-		if (methodToMustSideEffects == null)
-			methodToMustSideEffects = new HashMap();
+		//if (methodToMustSideEffects == null)
+		//	methodToMustSideEffects = new HashMap();
 		methodToMustSideEffects.put(sm, summary);
 	}
 
 	public void putReturnSideEffects(String sm, MultiSet summary) {
-		if (methodToReturnSideEffects == null)
-			methodToReturnSideEffects = new HashMap();
+		//if (methodToReturnSideEffects == null)
+		//	methodToReturnSideEffects = new HashMap();
 		methodToReturnSideEffects.put(sm, summary);
 	}
 
@@ -128,21 +129,21 @@ public class SEAnalysisResults extends AnalysisResults{
 
 
 	public boolean containsSideEffects(String sm) {
-		if (methodToSideEffects == null)
-			return false;
+//		if (methodToSideEffects == null)
+//			return false;
 		return methodToSideEffects.containsKey(sm);
 
 	}
 	
 	public boolean containsMustSideEffects(String sm) {
-		if (methodToMustSideEffects == null)
-			return false;
+//		if (methodToMustSideEffects == null)
+//			return false;
 		return methodToMustSideEffects.containsKey(sm);
 	}
 
 	public boolean containsReturnSideEffects(String sm) {
-		if (methodToReturnSideEffects == null)
-			return false;
+//		if (methodToReturnSideEffects == null)
+//			return false;
 		return methodToReturnSideEffects.containsKey(sm);
 	}
 	
@@ -185,9 +186,9 @@ public class SEAnalysisResults extends AnalysisResults{
 		}
 
 		
-		for (Iterator it =  methodToAliases.keySet().iterator(); it.hasNext();) {
+		for (Iterator<SootMethod> it =  methodToAliases.keySet().iterator(); it.hasNext();) {
 			
-			method = (SootMethod) it.next();
+			method = it.next();
 			methodSignature = method.getSignature();
 			
 			jb = method.retrieveActiveBody();

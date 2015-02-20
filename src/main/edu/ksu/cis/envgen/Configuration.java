@@ -23,6 +23,7 @@ import soot.options.*;
 import edu.ksu.cis.envgen.applinfo.*;
 import edu.ksu.cis.envgen.applinfo.domain.*;
 import edu.ksu.cis.envgen.codegen.*;
+import edu.ksu.cis.envgen.util.*;
 
 public class Configuration {
 
@@ -378,23 +379,23 @@ public class Configuration {
 			Options.v().set_src_prec(Options.src_prec_java);
 		}
 
+		List<String> excludedPackages = new ArrayList<String>();
+		
 		String ignoreAnalyzingStr = properties.getProperty("ignoreAnalyzing");
 		if (ignoreAnalyzingStr != null) {
-			List<String> excludedPackages = new ArrayList<String>();
-			excludedPackages.add(ignoreAnalyzingStr);
-
-			//excludedPackages.add("java.");
-			excludedPackages.add("sun.");
-			//excludedPackages.add("javax.");
-			excludedPackages.add("com.sun.");
-			excludedPackages.add("com.ibm.");
-			excludedPackages.add("org.xml.");
-			excludedPackages.add("org.w3c.");
-			//excludedPackages.add("org.apache.");
-
-			Options.v().set_exclude(excludedPackages);
-
+			List<String> ignoreAnalyzingList = Util.getTokenList(ignoreAnalyzingStr);
+			excludedPackages.addAll(ignoreAnalyzingList);
 		}
+		//excludedPackages.add("java.");
+		//excludedPackages.add("javax.");
+		excludedPackages.add("sun.");
+		excludedPackages.add("com.sun.");
+		excludedPackages.add("com.ibm.");
+		excludedPackages.add("org.xml.");
+		excludedPackages.add("org.w3c.");
+		//excludedPackages.add("org.apache.");
+
+		Options.v().set_exclude(excludedPackages);
 
 		// SPARK PTA requirements
 		// Options.v().set_keep_line_number(true);

@@ -5,3 +5,5 @@ TODO
 + Update to Java 1.7
 
 - Update to use generics
+
+- Implement flow-insensitive analysis

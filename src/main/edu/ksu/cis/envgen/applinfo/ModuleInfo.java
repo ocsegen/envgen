@@ -207,6 +207,7 @@ public abstract class ModuleInfo {
 	/**
 	 * Checks whether paramTypeClass is a supertype of any of the unit classes.
 	 */
+	//TODO: implement a version that considers unit types only
 	public boolean isModuleType(SootClass sc) {
 		String className = sc.getName();
 		//SootClass unitClass;

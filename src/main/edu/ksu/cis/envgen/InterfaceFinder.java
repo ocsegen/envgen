@@ -11,12 +11,9 @@
  */ 
 package edu.ksu.cis.envgen;
 
-import java.util.*;
-
 /** Interface between the unit and the environment */
-public abstract class InterfaceFinder {
+public abstract class InterfaceFinder extends EnvGenModule {
 
-	public abstract void setOptions(Properties properties);	
 	public abstract ApplInfo findInterface(ApplInfo applInfo);
 
 }

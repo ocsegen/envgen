@@ -99,7 +99,7 @@ public class EnvGenerator {
 		//long analysisTime = myAnalysisFinish - myStart;
 		long analysisTime = myAnalysisFinish - myAnalysisStart;
         logger.info("\nWhole program exec time: " + execTime);
-		logger.info("\nBEG exec time: " + myExecTime);
+		logger.info("\nOCSEGen exec time: " + myExecTime);
 		logger.info("\nFind Interface time: " + findInterfaceTime);
 		logger.info("\nAnalysis time: " + analysisTime);
 		

@@ -34,10 +34,10 @@ import edu.ksu.cis.envgen.util.MultiSet;
  */
 public class SEAnalysis extends StaticAnalysis {
 
-	SEAnalysisResults seAnalysisResults;
+	protected SEAnalysisResults seAnalysisResults;
 	
-	boolean returnSensitivity = false;
-	boolean mustSE = false;
+	protected boolean returnSensitivity = false;
+	protected boolean mustSE = false;
 	
 	
 	public SEAnalysis(ApplInfo applInfo, PTAnalysisResults ptAnalysisResults) {
@@ -56,7 +56,7 @@ public class SEAnalysis extends StaticAnalysis {
 	
 	public void setOptions(Properties properties){
 		//TODO: finish
-		logger.warning("finish implementation");
+		logger.fine("finish implementation");
 	}
 
 	public SEAnalysisResults getSEAnalysisResults(){
@@ -102,6 +102,9 @@ public class SEAnalysis extends StaticAnalysis {
 		HashSet<SootMethod> visited) {
 		//we enter this method only if there is no mapping from
 		//external method to its side-effects summary
+		
+		logger.info("\nAnalyzing method: "+ externalMethod);
+		logger.fine("\nVisited: "+ visited);
 
 		if (visited.contains(externalMethod)) {
 			//has been visited but no summary
@@ -384,7 +387,7 @@ public class SEAnalysis extends StaticAnalysis {
 		return new DataFlowSet(modified);
 	}
 	/**
-	 * Calculates sode-effects summary by combining all of the side-effects
+	 * Calculates side-effects summary by combining all of the side-effects
 	 * at exit points of the method.
 	 */
 	public DataFlowSet getSummary(

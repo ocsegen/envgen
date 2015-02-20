@@ -12,9 +12,9 @@
 package edu.ksu.cis.envgen;
 
 import java.util.HashMap;
+import java.util.List;
 
 import soot.*;
-
 import edu.ksu.cis.envgen.analysis.cg.EnvCallGraph;
 import edu.ksu.cis.envgen.applinfo.EnvHierarchy;
 import edu.ksu.cis.envgen.applinfo.ModuleInfo;
@@ -24,6 +24,9 @@ public abstract class ApplInfo {
 	protected ModuleInfo env;
 	protected EnvCallGraph callGraph;
 	protected EnvHierarchy envHierarchy;
+	
+	/** List of packages to ignore modeling */
+	protected List<String> ignoredInfo;
 	
 	/** Additional relevant info */
 	protected HashMap<String, SootMethod> relevantInfo;
@@ -83,6 +86,31 @@ public abstract class ApplInfo {
 	public HashMap<String, SootMethod> getRelevantInfo(){
 		return relevantInfo;
 	}
+	
+	
+	public void setIgnoredInfo(List<String> ii){
+		ignoredInfo = ii;
+	}
+	
+	public List<String> getIgnoredInfo(){
+		return ignoredInfo;
+	}
+	
+	/** used to ignore modeling certain packages */
+	public boolean isRelevantPackage(String p){
+		if(ignoredInfo == null)
+			return true;
+		
+		if(ignoredInfo.contains(p))
+			return false;
+		return true;	
+	}
+	
+	//TODO: need 2 types of isRelevantType
+	//used in PTA
+	//public abstract boolean isRelevantRefType(Type type);
+	//used in side-effects
+	//public abstract boolean isRelevantRefOrScalarType(Type type);
 	
 	//used to track objects by type in points-to analysis
 	public abstract boolean isRelevantType(Type type);

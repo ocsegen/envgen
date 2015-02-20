@@ -82,11 +82,8 @@ public class PTAnalysis extends StaticAnalysis {
 		
 		String methodSignature = externalMethod.getSignature();
 		
-		logger.fine(
-				"\nAnalysis analyzeAliases sootmethod: "
-					+ externalMethod
-					+ "\nVisited: "
-					+ visited);
+		logger.info("\nAnalyzing method: "+ externalMethod);
+		logger.fine("\nVisited: "+ visited);
 
 		if (visited.contains(externalMethod)) {
 			

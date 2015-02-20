@@ -169,9 +169,9 @@ public class DataFlowSet implements FlowSet {
 		if (!dest.isEmpty())
 			dest.clear();
 
-		Set keys = this.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			tempVar = (Value) it.next();
+		Set<Value> keys = this.keySet();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			tempVar =  it.next();
 			tempSyms = (MultiSet) this.get(tempVar);
 			((DataFlowSet) dest).put(tempVar, tempSyms);
 		}
@@ -199,9 +199,9 @@ public class DataFlowSet implements FlowSet {
 					+ "\n\n minus \n\n"
 					+ other);
 
-		Set keys = ((DataFlowSet) other).keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			temp = (Value) it.next();
+		Set<Value> keys = ((DataFlowSet) other).keySet();
+		for (Iterator<Value> it = keys.iterator(); it.hasNext();) {
+			temp = it.next();
 			// if doesn't contain, no need to subtract
 			if (((DataFlowSet) dest).containsKey(temp)) {
 				key = ((DataFlowSet) dest).getKey(temp);

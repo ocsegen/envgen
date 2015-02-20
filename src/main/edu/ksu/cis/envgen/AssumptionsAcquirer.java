@@ -11,7 +11,6 @@
  */  
 package edu.ksu.cis.envgen;
 
-import java.util.*;
 
 /**
  *
@@ -19,11 +18,7 @@ import java.util.*;
  * analysis, or other technique.
  *
  */
-public abstract class AssumptionsAcquirer {
+public abstract class AssumptionsAcquirer extends EnvGenModule {
 
-	
-	public abstract void setOptions(Properties properties);
-	
 	public abstract Assumptions acquireAssumptions(ApplInfo info);
-	
 }

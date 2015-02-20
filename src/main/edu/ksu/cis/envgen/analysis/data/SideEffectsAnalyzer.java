@@ -19,31 +19,23 @@ import soot.*;
 import edu.ksu.cis.envgen.*;
 import edu.ksu.cis.envgen.analysis.AnalysisResults;
 import edu.ksu.cis.envgen.analysis.pta.*;
-import edu.ksu.cis.envgen.applinfo.*;
+
 
 /**
  * Implements methods shared by points-to and side-effects analyses.
  * 
  */
 public class SideEffectsAnalyzer extends AssumptionsAcquirer {
-	/** Unit classes. */
-	public ModuleInfo unit;
-	
-	public ModuleInfo env;
-	
-	public ApplInfo applInfo; 
 
-	Properties properties;
+	protected boolean unitAnalysis = false;
 	
-	boolean unitAnalysis = false;
+	protected boolean mustSE = false;
 	
-	boolean mustSE = false;
+	protected boolean printToFile = false;
 	
-	boolean printToFile =  false;
-	String printFileName = null;
+	protected String printFileName = null;
 
-	
-	public Logger logger = Logger.getLogger("edu.ksu.cis.envgen.analysis");
+	protected Logger logger = Logger.getLogger("edu.ksu.cis.envgen.analysis");
 	
 	
 	public SideEffectsAnalyzer(){	
@@ -89,8 +81,7 @@ public class SideEffectsAnalyzer extends AssumptionsAcquirer {
 		
 		logger.info("\nMethods under analysis: \n" + markedMethods);
 		
-		 PTAnalysis pta =
-				new PTAnalysis(applInfo);
+		 PTAnalysis pta = new PTAnalysis(applInfo);
 		 pta.setOptions(properties);
 
 		HashSet<SootMethod> visited = new HashSet<SootMethod>();

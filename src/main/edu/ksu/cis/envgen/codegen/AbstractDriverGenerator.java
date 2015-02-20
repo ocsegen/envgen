@@ -23,12 +23,12 @@ import edu.ksu.cis.envgen.spec.*;
  * 
  */
 public abstract class AbstractDriverGenerator extends CodeGenerator {
-	/** Table of unit (internal) classes. */
-	public ModuleInfo unit;
-
-	/**
-	 * Table of environment classes. */
-	public ModuleInfo env;	
+//	/** Table of unit (internal) classes. */
+//	public ModuleInfo unit;
+//
+//	/**
+//	 * Table of environment classes. */
+//	public ModuleInfo env;	
 	
 	public List instantiations;
 	public Map definitions;

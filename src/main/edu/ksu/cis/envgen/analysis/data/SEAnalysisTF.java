@@ -38,37 +38,35 @@ import edu.ksu.cis.envgen.util.MultiSet;
  */
 public class SEAnalysisTF extends ForwardFlowAnalysis {
 	/** Initial data flow set, empty for this analysis. */
-	FlowSet initSet;
+	protected FlowSet initSet;
 
 	/**
 	 * Alias analysis results that are used by the side-effects
 	 * analysis to resolve aliases.
 	 */
-	PTAnalysisTF alias;
+	protected PTAnalysisTF alias;
 
 	/** Call graph that gets traversed in the top down order. */
-	EnvCallGraph callGraph;
+	protected EnvCallGraph callGraph;
 
-	SEAnalysisResults seAnalysisResults;
+	protected SEAnalysisResults seAnalysisResults;
 
 	/** Set that keeps track of visited methods, used to detect cycles
 	 * in the call graph. When a cycle is detected, it is broken and the most general
 	 * information is assumed.  For example, for side-effects analysis, the method is
 	 * assumed to modifies all possible locations of our interest.
 	 */
-	HashSet visited;
-	SootMethod method;
+	protected HashSet visited;
+	protected SootMethod method;
 
 	/** <code>Analysis</code> field,whose method <code>analyzeSideEffects()</code>
 	 * gets recursively called for each of the targets at a call site.
 	 */
-	SEAnalysis analysis;
+	protected SEAnalysis analysis;
 
-	boolean mustSE;
+	protected boolean mustSE;
 	
-	Logger logger = Logger.getLogger("envgen.analysis.stat");
-
-	//int debug = 0;
+	protected Logger logger = Logger.getLogger("envgen.analysis.data");
 
 	/**
 	 * Initially data flow set is empty.
@@ -232,15 +230,17 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 		SymLoc symLoc;
 		MultiSet locs = new MultiSet();
 
-		logger.fine("ArrayRef on lhs");
+		logger.fine("ArrayRef on lhs: "+lhs);
 		Value base = ((ArrayRef) lhs).getBase();
-		logger.finer("array ref base type: " + base.getType());
 		Value index = ((ArrayRef) lhs).getIndex();
 		//figure out the element type
 		Type baseType = base.getType();
 		Type elemType = ((ArrayType) baseType).baseType;
+		
+		logger.fine("ArrayRef base type: " + baseType);
+		logger.fine("Elem type: " + elemType);
+		
 		Accessor accessor = new Accessor(0, elemType);
-	    
 		return getExtendedLocs(base, elemType, baseType, accessor, aliasSet);
 	}
 
@@ -316,7 +316,7 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 				}
 			}
 			
-			//if side-effects summary infor not available, call recursion
+			//if side-effects summary info not available, call recursion
 			Map methodToSideEffects;
 			if (mustSE)
 				methodToSideEffects =
@@ -433,7 +433,7 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 
 		//check whether this field/array access  needs to be processed
 		if (analysis.processRefOrScalarType(modType)) {
-			logger.fine("unit field");
+			logger.info("unit field of type: " + modType);
 			//check whether the base of this field ref is in the alias table
 			if (aliasSet.containsKey(base)) {
 				logger.fine("\nSideEffects base: " + base + " in the table");
@@ -450,8 +450,8 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 
 				logger.fine("\nAlias set for base: " + set);
 				SymLoc temp = null;
-				for (Iterator is = set.iterator(); is.hasNext();) {
-					temp = (SymLoc) is.next();
+				for (Iterator<SymLoc> is = set.iterator(); is.hasNext();) {
+					temp = is.next();
 					if (temp instanceof SymLocPath) {
 						symLoc = getExtendedLoc((SymLocPath)temp, accessor);
 						symLoc.setModifiedType(modType);
@@ -462,6 +462,7 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 			} else {
 				//there is no record for the base of this field
 				//create an unknown location with field
+				//TODO: recheck, this might create garbage
 				symLoc = new SymLocTop(SymLocTop.UNKNOWN_LOC, baseType);
 				symLoc.setModifiedAccessor(accessor);
 				symLoc.setModifiedType(modType);
@@ -486,7 +487,7 @@ public class SEAnalysisTF extends ForwardFlowAnalysis {
 		return extLoc;
 	}
 
-	SEAnalysisTF(
+	public SEAnalysisTF(
 		UnitGraph g,
 		SootMethod method,
 		FlowSet initSet,

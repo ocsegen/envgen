@@ -17,7 +17,7 @@ public class ControlFlowGraph implements DirectedGraph {
 	//protected SootMethod method;
 	//protected Body body;
 	//protected Chain unitChain;
-	Collection unitChain;
+	Collection<Unit> unitChain;
 	
 
 	/**
@@ -53,14 +53,14 @@ public class ControlFlowGraph implements DirectedGraph {
 
 			// Add regular successors
 			{
-				Iterator unitIt = unitChain.iterator();
+				Iterator<Unit> unitIt = unitChain.iterator();
 				Unit currentUnit, nextUnit;
 
-				nextUnit = unitIt.hasNext() ? (Unit) unitIt.next() : null;
+				nextUnit = unitIt.hasNext() ?  unitIt.next() : null;
 
 				while (nextUnit != null) {
 					currentUnit = nextUnit;
-					nextUnit = unitIt.hasNext() ? (Unit) unitIt.next() : null;
+					nextUnit = unitIt.hasNext() ? unitIt.next() : null;
 
 					List successors = new ArrayList();
 
@@ -173,7 +173,7 @@ public class ControlFlowGraph implements DirectedGraph {
 
 			// initialize the pred sets to empty
 			{
-				Iterator unitIt = unitChain.iterator();
+				Iterator<Unit> unitIt = unitChain.iterator();
 
 				while (unitIt.hasNext()) {
 					unitToPreds.put(unitIt.next(), new ArrayList());
@@ -181,13 +181,13 @@ public class ControlFlowGraph implements DirectedGraph {
 			}
 
 			{
-				Iterator unitIt = unitChain.iterator();
+				Iterator<Unit> unitIt = unitChain.iterator();
 
 				while (unitIt.hasNext()) {
 					Unit s = (Unit) unitIt.next();
 
 					// Modify preds set for each successor for this statement
-					Iterator succIt = ((List) unitToSuccs.get(s)).iterator();
+					Iterator<Unit> succIt = ((List) unitToSuccs.get(s)).iterator();
 
 					while (succIt.hasNext()) {
 						Unit successor = (Unit) succIt.next();
@@ -222,15 +222,15 @@ public class ControlFlowGraph implements DirectedGraph {
 		{
 			//List tailList = new ArrayList();
 			//List headList = new ArrayList();
-			tails = new ArrayList();
-			heads = new ArrayList();
+			tails = new ArrayList<Unit>();
+			heads = new ArrayList<Unit>();
 
 			// Build the sets
 			{
-				Iterator unitIt = unitChain.iterator();
+				Iterator<Unit> unitIt = unitChain.iterator();
 
 				while (unitIt.hasNext()) {
-					Unit s = (Unit) unitIt.next();
+					Unit s = unitIt.next();
 
 					List succs = (List) unitToSuccs.get(s);
 					if (succs.size() == 0)
@@ -367,10 +367,10 @@ public class ControlFlowGraph implements DirectedGraph {
 	}
 
 	public String toString() {
-		Iterator it = unitChain.iterator();
+		Iterator<Unit> it = unitChain.iterator();
 		StringBuffer buf = new StringBuffer();
 		while (it.hasNext()) {
-			Unit u = (Unit) it.next();
+			Unit u = it.next();
 
 			List l = new ArrayList();
 			l.addAll(getPredsOf(u));

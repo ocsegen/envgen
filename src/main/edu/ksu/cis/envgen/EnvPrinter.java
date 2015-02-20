@@ -11,9 +11,8 @@
  */ 
 package edu.ksu.cis.envgen;
 
-import java.util.Properties;
 
-public abstract class EnvPrinter {
-	public abstract void setOptions(Properties properties);
+public abstract class EnvPrinter extends EnvGenModule {
+	
 	public abstract void printfEnv(ApplInfo info);
 }

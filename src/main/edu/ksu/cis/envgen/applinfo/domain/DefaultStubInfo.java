@@ -29,7 +29,7 @@ public class DefaultStubInfo extends ApplInfo {
 		if (unit.isModuleType(sc)) {
 			return true;
 		}
-		logger.info("Not relevant: "+sc);
+		logger.fine("Not relevant: "+sc);
 		return false;
 	}
 	

@@ -25,14 +25,17 @@ import edu.ksu.cis.envgen.spec.UserSpec;
  * 
  */
 public abstract class AbstractStubGenerator  extends CodeGenerator {
-	/** Unit classes. */
-	ModuleInfo unit;
 
-	/** 
-	 * Keeps track of environment components, 
-	 * including only those that get called inside the unit. 
-	 */
-	ModuleInfo env;
+//	ApplInfo applInfo;
+//	
+//	/** Unit classes. */
+//	ModuleInfo unit;
+//
+//	/** 
+//	 * Keeps track of environment components, 
+//	 * including only those that get called inside the unit. 
+//	 */
+//	ModuleInfo env;
 	
 	Assumptions assumptions;
 	
@@ -42,6 +45,7 @@ public abstract class AbstractStubGenerator  extends CodeGenerator {
 		
 		assert(info != null);
 		
+		this.applInfo = info;
 		this.unit = info.getUnit();
 		this.env = info.getEnv();
 
@@ -51,7 +55,7 @@ public abstract class AbstractStubGenerator  extends CodeGenerator {
 
 	/**
 	 * If <code>seAnalysis</code>
-	 * is set, performs side-effects analysis and cretes bodies from summary
+	 * is set, performs side-effects analysis and creates bodies from summary
 	 * information for each of the environment methods.  
 	 * If specification is provided reads it
 	 * and generates bodies from user-provided descriptions.  If no specification
@@ -72,16 +76,16 @@ public abstract class AbstractStubGenerator  extends CodeGenerator {
 		SootMethod markedMethod;
 		String className;
 		//a hack to avoid ConcurrentModificationException
-		Collection keys = env.getClassNamesCopy();
+		Collection<String> keys = env.getClassNamesCopy();
 
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			className = (String)it.next();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+			className = it.next();
 		
 			markedClass = env.getClass(className);
 			
-			List methodsList = markedClass.getMethods();
-			for (Iterator mi = methodsList.iterator(); mi.hasNext();) {
-				markedMethod = (SootMethod) mi.next();
+			List<SootMethod> methodsList = markedClass.getMethods();
+			for (Iterator<SootMethod> mi = methodsList.iterator(); mi.hasNext();) {
+				markedMethod = mi.next();
 				if (markedMethod.isPhantom()
 					|| markedMethod.isAbstract()
 					|| markedMethod.isNative()) {

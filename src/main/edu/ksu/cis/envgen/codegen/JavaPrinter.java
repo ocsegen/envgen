@@ -17,7 +17,6 @@ import java.io.*;
 
 import soot.*;
 import soot.util.*;
-
 import edu.ksu.cis.envgen.*;
 import edu.ksu.cis.envgen.applinfo.*;
 import edu.ksu.cis.envgen.codegen.ast.*;
@@ -32,9 +31,9 @@ import edu.ksu.cis.envgen.util.Util;
  */
 public class JavaPrinter extends EnvPrinter{
 
-	ModuleInfo unit;
-	
-	ModuleInfo env;
+//	ModuleInfo unit;
+//	
+//	ModuleInfo env;
 	
 	EnvHierarchy envHierarchy;
 
@@ -55,7 +54,7 @@ public class JavaPrinter extends EnvPrinter{
 	
 	boolean unitAnalysis;
 	
-	String notModeled;
+	List<String> ignoreModelingList;
 	
 	Logger logger = Logger.getLogger("envgen.codegen");
 	
@@ -87,9 +86,10 @@ public class JavaPrinter extends EnvPrinter{
 		if(unitAnalysisStr != null)
 			unitAnalysis = Boolean.valueOf(unitAnalysisStr);
 
-		String notModeledStr = properties.getProperty("ignoreModeling");
-		if(notModeledStr != null)
-			notModeled = notModeledStr;
+		String ignoreModelingStr = properties.getProperty("ignoreModeling");
+		if(ignoreModelingStr!=null){
+			ignoreModelingList = Util.getTokenList(ignoreModelingStr);
+		}
 		
 		String outputDirNameStr = properties.getProperty("outputDirName");
 		if(outputDirNameStr != null)
@@ -115,6 +115,9 @@ public class JavaPrinter extends EnvPrinter{
 		assert info!=null;
 		this.unit = info.getUnit();
 		this.env = info.getEnv();
+		
+		System.out.println("********Env: "+env);
+		
 		this.envHierarchy = info.getEnvHierarchy();
 	}
 
@@ -129,21 +132,28 @@ public class JavaPrinter extends EnvPrinter{
 	 * Prints soot classes of <code>markedTable</code> to their files.                                
 	 *                                                         
 	 */
-	public void printfTable(Collection classes) {
+	public void printfTable(Collection<SootClass> classes) {
 		assert(classes != null);
 		SootClass markedClass;
 		String className;
+		String actualPackageName;
 
 		FileWriter file = null;
 		File path = null;
-		for (Iterator it = classes.iterator(); it.hasNext();) {
+		for (Iterator<SootClass> it = classes.iterator(); it.hasNext();) {
 
-			markedClass = (SootClass) it.next();
+			markedClass = it.next();
 
 			className = getActualName(markedClass.getName());
+			actualPackageName = getActualPackageName(className);
+			
+			//no need to generate code for classes in the ignoreModelingList
+			if(ignoreModelingList.contains(actualPackageName)){
+				logger.info("Ignoring printing of class: "+className);
+				continue;
+			}
 
-			//List methodsList = markedClass.getMethods();
-			//Iterator mi = methodsList.iterator();
+			logger.info("Printing class: "+className);
 
 			path = new File(getFullPathName(className));
 			try {
@@ -222,14 +232,14 @@ public class JavaPrinter extends EnvPrinter{
 
 		}
 		if (sc.getInterfaceCount() > 0) {
-			Chain interfaces = sc.getInterfaces();
+			Chain<SootClass> interfaces = sc.getInterfaces();
 
-			Iterator ii = interfaces.iterator();
+			Iterator<SootClass> ii = interfaces.iterator();
 			SootClass interfc;
 			String interfcName;
 
 			for (int i = 0; ii.hasNext();) {
-				interfc = (SootClass) ii.next();
+				interfc = ii.next();
 				interfcName = getActualName(interfc.getName());
 
 				if (!unit.containsClass(interfcName)
@@ -270,10 +280,10 @@ public class JavaPrinter extends EnvPrinter{
 		printf(file, Modifier.toString(sc.getModifiers()) + " ");
 		printf(file, getShortName(className) + " ");
 		if (sc.getInterfaceCount() > 0) {
-			Chain interfaces = sc.getInterfaces();
-			Iterator ii = interfaces.iterator();
+			Chain<SootClass> interfaces = sc.getInterfaces();
+			Iterator<SootClass> ii = interfaces.iterator();
 			for (int i = 0; ii.hasNext();) {
-				interfc = (SootClass) ii.next();
+				interfc = ii.next();
 				interfcName = getActualName(interfc.getName());
 				if (!unit.containsClass(interfcName)
 					&& !env.containsClass(interfcName))
@@ -322,13 +332,13 @@ public class JavaPrinter extends EnvPrinter{
 		SootField markedField;
 		//if (debug > 1)
 		//	System.out.println("printFields");
-		Chain fields = sc.getFields();
-		Iterator fi = fields.iterator();
+		Chain<SootField> fields = sc.getFields();
+		Iterator<SootField> fi = fields.iterator();
 		Type fieldType;
 		String fieldTypeName;
 		String fieldName;
 		while (fi.hasNext()) {
-			markedField = (SootField) fi.next();
+			markedField = fi.next();
 			fieldType = markedField.getType();
 			fieldTypeName = getPackageAdjustedType(fieldType);
 			fieldName = markedField.getName();
@@ -388,10 +398,10 @@ public class JavaPrinter extends EnvPrinter{
 	protected void printMethods(FileWriter file, SootClass sc) {
 		SootMethod markedMethod;
 		String methodName;
-		List methods = sc.getMethods();
-		Iterator mi = methods.iterator();
+		List<SootMethod> methods = sc.getMethods();
+		Iterator<SootMethod> mi = methods.iterator();
 		while (mi.hasNext()) {
-			markedMethod = (SootMethod) mi.next();
+			markedMethod = mi.next();
 			methodName = markedMethod.getName();
 
 			if (methodName.equals("<clinit>"))
@@ -484,13 +494,13 @@ public class JavaPrinter extends EnvPrinter{
 		SootMethod markedMethod) {
 
 		if (!markedMethod.getExceptions().isEmpty()) {
-			java.util.List exceptions = markedMethod.getExceptions();
-			Iterator ei = exceptions.iterator();
+			List<SootClass> exceptions = markedMethod.getExceptions();
+			Iterator<SootClass> ei = exceptions.iterator();
 			SootClass except = null;
 			String exceptName;
 
 			for (int i = 0; ei.hasNext(); i++) {
-				except = (SootClass) ei.next();
+				except = ei.next();
 				exceptName = getActualName(except.getName());
 
 				//if (!unitTable.containsKey(exceptName)
@@ -718,7 +728,7 @@ public class JavaPrinter extends EnvPrinter{
 	
 		//find implementors
 		//List implementors = envHierarchy.getDirImplementorsOf(sc);
-		List implementors = envHierarchy.getImplementorsOf(sc);
+		List<SootClass> implementors = envHierarchy.getImplementorsOf(sc);
 		if(implementors == null){
 			logger.warning("No implementors for: "+sc);
 			return getRandomObjectCall(sc.getName());
@@ -729,7 +739,7 @@ public class JavaPrinter extends EnvPrinter{
 		}
 		else if(implementors.size() == 1){
 			
-			SootClass implementor = (SootClass)implementors.get(0);
+			SootClass implementor = implementors.get(0);
 			//logger.fine("One implementor: "+implementor);
 			String typeName = JavaPrinter.getActualName(implementor.getName());
 			
@@ -740,7 +750,7 @@ public class JavaPrinter extends EnvPrinter{
 			
 		//TODO: for now, we pick one 
 		//may want to refine as a nondeterministic choice over all
-		SootClass implementor = (SootClass)implementors.get(0);
+		SootClass implementor = implementors.get(0);
 		String typeName = JavaPrinter.getActualName(implementor.getName());
 		return getPackageAdjustedType(typeName) +".TOP";
 			
@@ -753,15 +763,15 @@ public class JavaPrinter extends EnvPrinter{
 	/** 
 	  * Generates a list of top values for a list of <code>types</code>. 
 	  */	
-	public String printTopArgs(List types) {
+	public String printTopArgs(List<Type> types) {
 
 		assert(types != null);
 		
 		String result = "";
 		Type argType;
 		int count = 0;
-		for (Iterator ti = types.iterator(); ti.hasNext();) {
-			argType = (Type) ti.next();
+		for (Iterator<Type> ti = types.iterator(); ti.hasNext();) {
+			argType = ti.next();
 			if (count != 0)
 				result = result + ", ";
 			result = result + printTopValue(argType);
@@ -774,7 +784,7 @@ public class JavaPrinter extends EnvPrinter{
 	  * Generates a list of top values for a list of <code>types</code>. 
 	  */
 	
-	public String printArgs(List args) {
+	public String printArgs(List<JavaExpr> args) {
 		//assert(args != null);
 		if(args == null)
 			return "null";
@@ -782,9 +792,9 @@ public class JavaPrinter extends EnvPrinter{
 		String result = "";
 		int count = 0;
 		JavaExpr val;
-		for (Iterator ai = args.iterator(); ai.hasNext();) {
+		for (Iterator<JavaExpr> ai = args.iterator(); ai.hasNext();) {
 			//argType = (Type) di.next();
-			val = (JavaExpr)ai.next();
+			val = ai.next();
 			if (count != 0)
 				result = result + ", ";
 			result = result + val.getCode(this);
@@ -884,9 +894,13 @@ public class JavaPrinter extends EnvPrinter{
 	
 	//all type adjustments should happen in this class
 	public String getPackageAdjustedType(String name) {
-		if(notModeled!=null)
-			if (name.startsWith(notModeled))
-				return name;
+		
+		String actualPackageName = getActualPackageName(name);
+		
+		//no prefixing for ignored types, using the actual types
+		if(ignoreModelingList.contains(actualPackageName))
+			return name;
+		
 		
 		//only environment types get prefixed
 		if(unit.containsClass(name))
@@ -998,6 +1012,22 @@ public class JavaPrinter extends EnvPrinter{
 		}
 		return name;
 
+	}
+	
+	public String getActualPackageName(String name) {
+		String result = "";
+		
+		if (name.startsWith("$")) {
+			//String result = new String(name.substring(1));
+			//System.out.println("EnvPrinter, getName: "+ result);
+			name = name.substring(1);
+		}
+	
+		int index = name.lastIndexOf(".");
+		if (index >= 0)
+			result = name.substring(0, index);
+		
+		return result;
 	}
 
 	/**

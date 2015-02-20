@@ -11,16 +11,13 @@
  */   
 package edu.ksu.cis.envgen;
 
-import java.util.*;
 
 /**
  * 
  * Given environment assumptions, generates environment code.
  * 
  */
-public abstract class CodeGenerator {
-
-	public abstract void setOptions(Properties properties);
+public abstract class CodeGenerator extends EnvGenModule {
 		
 	public abstract void genCode(ApplInfo info, Assumptions assumptions);
 }

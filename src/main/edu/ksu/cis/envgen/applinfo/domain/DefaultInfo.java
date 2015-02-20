@@ -38,7 +38,7 @@ public class DefaultInfo extends ApplInfo {
 		logger.warning("finish implementation");
 		return true;	
 	}
-
+	
 	public boolean isRelevantField(SootField sf) {
 		//TODO: finish
 		logger.warning("finish implementation");

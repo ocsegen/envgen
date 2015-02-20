@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import soot.*;
 import soot.util.*;
-
 import edu.ksu.cis.envgen.codegen.ast.*;
 import edu.ksu.cis.envgen.codegen.ast.stmt.JavaStmt;
 import edu.ksu.cis.envgen.codegen.vals.*;
@@ -29,6 +28,8 @@ import edu.ksu.cis.envgen.util.Util;
 public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 	
 	boolean atomicStepsMode = false; 
+	
+	boolean unitAnalysis = false; 
 	
 	String packageName = "";
 	
@@ -43,6 +44,11 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 		String packageNameStr = properties.getProperty("packageName");
 		if(packageNameStr != null)
 			packageName = packageNameStr;
+	
+		String unitAnalysisStr = properties.getProperty("unitAnalysis");
+		if(unitAnalysisStr != null)
+			unitAnalysis = Boolean.valueOf(unitAnalysisStr);
+		
 	}
 
 	/**
@@ -50,6 +56,7 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 	 * declare f, such field is included. 
 	 */
 	public void genMissingFields(SymLocValue symVal, SootClass markedClass) {
+				
 		if(!(symVal instanceof SymLoc))
 			return;
 		SymLoc sym = (SymLoc)symVal;
@@ -83,9 +90,9 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 						logger.severe("null class for type: "+fieldType);
 					}
 					else{
-					
+						
 						//TODO: check unitAnalysis
-						if(!unit.containsClass(typeClass.getName())){
+						if(applInfo.isRelevantPackage(typeClass.getPackageName()) && !unit.containsClass(typeClass.getName())){
 							env.addClass(typeClass);
 						}
 					}
@@ -107,7 +114,7 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 		if(locTypeClass == null)
 			logger.severe("null class for type: "+type);
 		else
-		  if(!unit.containsClass(locTypeClass.getName())){
+		  if(applInfo.isRelevantPackage(locTypeClass.getPackageName()) && !unit.containsClass(locTypeClass.getName())){
 			env.addClass(locTypeClass);
 		}
 		
@@ -127,8 +134,8 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 		Type classType;
 		String className, typeName, name;
 		
-		for (Iterator it = env.getClasses().iterator(); it.hasNext();) {
-			markedClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = env.getClasses().iterator(); it.hasNext();) {
+			markedClass = it.next();
 			if (markedClass.isInterface())
 				continue;
 			if(markedClass.isAbstract())
@@ -220,8 +227,8 @@ public abstract class JavaStubGenerator  extends AbstractStubGenerator {
 		Chain units = body.getUnits();
 		// construct the body
 
-		for (Iterator it = env.getClasses().iterator(); it.hasNext();) {
-			markedClass = (SootClass) it.next();
+		for (Iterator<SootClass> it = env.getClasses().iterator(); it.hasNext();) {
+			markedClass = it.next();
 			//get rid of a prefix
 			typeName = JavaPrinter.getActualName(markedClass.getName());
 			
