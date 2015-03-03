@@ -415,7 +415,7 @@ public abstract class StaticAnalysis{
 		}
 		
 		if(mappedValues.isEmpty())
-			logger.severe("Mapped Values empty for stmt: "+ unit);
+			logger.fine("Mapped Values empty for stmt: "+ unit);
 		
 		logger.finer("mapped set: " + mappedValues);
 
@@ -481,7 +481,10 @@ public abstract class StaticAnalysis{
 		
 		logger.fine("??getValues of: " + rhs + " of type: "+ fieldType);
 
-		if(fieldType instanceof RefLikeType){
+		//TODO: double check
+		//may need to track primitive types for return values
+		//if(fieldType instanceof RefLikeType){
+		if(processRefType(fieldType)){
 			if (rhs instanceof NullConstant) {
 				val = new SymLocPath(new RootNull(rhs, rhs.getType()), fieldType);
 				result.add(val);
