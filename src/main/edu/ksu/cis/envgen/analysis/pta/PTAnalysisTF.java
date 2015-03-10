@@ -252,7 +252,7 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 
 			} else {
 				
-				logger.severe("PointsToAnalysis, processAssignStmt: unhandled rhs: "
+				logger.warning("PointsToAnalysis, processAssignStmt: unhandled rhs: "
 								+ rhs);
 			}
 			if (locs != null && !locs.isEmpty()) {
@@ -318,7 +318,8 @@ public class PTAnalysisTF extends ForwardFlowAnalysis {
 		Type fieldType = field.getType();
 		Value base = ((JInstanceFieldRef) rhs).getBase();
 
-		if (analysis.processRefType(fieldType)) {
+		//can track specific fields
+		if (/* analysis.processRefField(field) || */ analysis.processRefType(fieldType)) {
 			// if base in the set, then it's location of our interest
 			if (in.containsKey(base)) {
 				logger.finer("\nAlias Analysis: pointer to base unit");

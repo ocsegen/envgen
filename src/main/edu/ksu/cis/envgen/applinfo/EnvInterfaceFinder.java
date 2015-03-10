@@ -167,7 +167,7 @@ public class EnvInterfaceFinder extends InterfaceFinder {
 		//ApplInfo info = new ApplInfo(unit, env, domainInfo, callGraph, envHierarchy);
 		applInfo.setEnvCallGraph(callGraph);
 		applInfo.setEnvHierarchy(envHierarchy);
-		applInfo.setIgnoredInfo(ignoreModelingList);
+		applInfo.setIngoredPackages(ignoreModelingList);
 		
 		return applInfo;
 	}

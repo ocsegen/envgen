@@ -26,10 +26,17 @@ public abstract class ApplInfo {
 	protected EnvHierarchy envHierarchy;
 	
 	/** List of packages to ignore modeling */
-	protected List<String> ignoredInfo;
+	protected List<String> ignoredPackages;
 	
-	/** Additional relevant info */
-	protected HashMap<String, SootMethod> relevantInfo;
+	/** Additional info about methods the analysis needs to track */
+	protected HashMap<String, SootMethod> relevantMethods;
+	
+	/** Additional info about fields the analysis needs to track */
+	protected HashMap<String, SootField> relevantFields;
+	
+	/** Additional info about relevant types, used in PT analysis */
+	protected HashMap<String, Type> relevantTypes;
+	
 	
 	public ApplInfo(){}
 	
@@ -79,46 +86,58 @@ public abstract class ApplInfo {
 		return envHierarchy;
 	}
 	
-	public void setRelevantInfo(HashMap<String, SootMethod> set){
-		relevantInfo = set;
+	public void setRelevantMethods(HashMap<String, SootMethod> set){
+		relevantMethods = set;
 	}
 	
-	public HashMap<String, SootMethod> getRelevantInfo(){
-		return relevantInfo;
+	public HashMap<String, SootMethod> getRelevantMehtods(){
+		return relevantMethods;
+	}
+	
+	public void setRelevantFields(HashMap<String, SootField> set){
+		relevantFields = set;
+	}
+	
+	public HashMap<String, SootField> getRelevantFields(){
+		return relevantFields;
 	}
 	
 	
-	public void setIgnoredInfo(List<String> ii){
-		ignoredInfo = ii;
+	public void setRelevantTypes(HashMap<String, Type> rt){
+		relevantTypes = rt;
 	}
 	
-	public List<String> getIgnoredInfo(){
-		return ignoredInfo;
+	public HashMap<String, Type> getRelevantTypes(){
+		return relevantTypes;
+	}
+	
+	public void setIngoredPackages(List<String> ii){
+		ignoredPackages = ii;
+	}
+	
+	public List<String> getIgnoredPackages(){
+		return ignoredPackages;
 	}
 	
 	/** used to ignore modeling certain packages */
 	public boolean isRelevantPackage(String p){
-		if(ignoredInfo == null)
+		if(ignoredPackages == null)
 			return true;
 		
-		if(ignoredInfo.contains(p))
+		if(ignoredPackages.contains(p))
 			return false;
 		return true;	
 	}
-	
-	//TODO: need 2 types of isRelevantType
-	//used in PTA
-	//public abstract boolean isRelevantRefType(Type type);
-	//used in side-effects
-	//public abstract boolean isRelevantRefOrScalarType(Type type);
 	
 	//used to track objects by type in points-to analysis
 	public abstract boolean isRelevantType(Type type);
 	
 	//used to track objects by type in points-to analysis
 	public abstract boolean isRelevantClass(SootClass sc);
+	
 	//used in call graph construction
 	public abstract boolean isRelevantMethod(SootMethod sm);
+	
 	//used to track fields in Side-Effects analysis
 	public abstract boolean isRelevantField(SootField sf);
 	
